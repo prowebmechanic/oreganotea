@@ -40,6 +40,7 @@ interface LogoSectionProps {
   onSendShare: () => void;
   onExportProjectData: () => void;
   onNewProject: () => void;
+  onImportProjectData: () => void;
 }
 
 const LogoSection: React.FC<LogoSectionProps> = ({ 
@@ -50,14 +51,15 @@ const LogoSection: React.FC<LogoSectionProps> = ({
   isSavingToDrive,
   onSendShare,
   onExportProjectData,
-  onNewProject
+  onNewProject,
+  onImportProjectData,
 }) => {
   return (
     <div className="bg-transparent p-2.5 h-auto flex flex-col items-center justify-start">
       <h1 className="text-2xl font-bold text-primary mb-2 flex items-center">
         <SpiceBottleIcon />
         <span style={{ color: 'forestgreen' }} className="ml-1">Oregano</span>
-        <span className="text-primary ml-0.5">té</span>
+        <span className="text-primary ml-0.5">téa</span>
       </h1>
       
       <div className="flex flex-col space-y-1.5 w-full px-1">
@@ -91,8 +93,8 @@ const LogoSection: React.FC<LogoSectionProps> = ({
             <DropdownMenuItem onClick={onExportProjectData}>
               <Download className="mr-2 h-4 w-4" /> Export Project Data
             </DropdownMenuItem>
-             <DropdownMenuItem>
-              <UploadCloud className="mr-2 h-4 w-4" /> Import Project Data (soon)
+             <DropdownMenuItem onClick={onImportProjectData}>
+              <UploadCloud className="mr-2 h-4 w-4" /> Import Project Data
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel>Account &amp; Help</DropdownMenuLabel>

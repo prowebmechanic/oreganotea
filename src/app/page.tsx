@@ -280,6 +280,10 @@ export default function OreganotePage() {
       toast({ title: "Export Failed", description: "An error occurred while exporting project data.", variant: "destructive" });
     }
   }, [savedNotes, dailyNotes, tasks, links, toast]);
+  
+  const handleImportProjectData = useCallback(() => {
+    toast({ title: "Import Project Data", description: "Functionality to import project data coming soon!" });
+  }, [toast]);
 
   // New Project
   const handleNewProjectConfirm = useCallback(() => {
@@ -324,6 +328,7 @@ export default function OreganotePage() {
           isSavingToDrive={isSavingToDrive}
           onSendShare={handleSendShare}
           onExportProjectData={handleExportProjectData}
+          onImportProjectData={handleImportProjectData}
           onNewProject={() => setShowNewProjectDialog(true)}
         />
       </div>
