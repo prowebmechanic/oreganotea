@@ -7,11 +7,10 @@ import FilesSection from '@/components/orga-note/FilesSection';
 import CalendarSection from '@/components/orga-note/CalendarSection';
 import MainWindow from '@/components/orga-note/MainWindow';
 import NotesSection from '@/components/orga-note/NotesSection';
-import ExpandSection from '@/components/orga-note/ExpandSection';
-// AppFilesSection and TraySection are removed
+import ProjectFilesSection from '@/components/orga-note/ProjectFilesSection';
 import SidebarRight from '@/components/orga-note/SidebarRight';
-import Footer from '@/components/orga-note/Footer';
 import UploadSection from '@/components/orga-note/UploadSection';
+import LinksSection from '@/components/orga-note/LinksSection';
 
 
 import { summarizeNote, type SummarizeNoteInput } from '@/ai/flows/summarize-note';
@@ -19,7 +18,8 @@ import { useToast } from "@/hooks/use-toast";
 import type { SavedNote } from '@/types/note';
 import { getSavedNotes, saveNotes as saveNotesToStorage } from '@/lib/localStorage';
 
-export default function OrgaNotePage() {
+export default function OreganotePage() {
+  const [noteTitle, setNoteTitle] = useState<string>('');
   const [noteContent, setNoteContent] = useState<string>('');
   const [summary, setSummary] = useState<string>('');
   const [keyTopics, setKeyTopics] = useState<string>('');
@@ -36,9 +36,11 @@ export default function OrgaNotePage() {
     if (typeof window !== 'undefined') {
       const notesFromStorage = getSavedNotes();
       setSavedNotes(notesFromStorage);
+      // Optionally, load the first note or a default state
       if (notesFromStorage.length > 0) {
-        // Optionally load the most recent note or leave blank
-        // handleLoadNote(notesFromStorage[0].id); 
+        // handleLoadNote(notesFromStorage[0].id); // Example: load first note
+      } else {
+        setNoteTitle('Untitled Note'); // Default title for a new note
       }
     }
   }, []);
@@ -85,10 +87,18 @@ export default function OrgaNotePage() {
   }, [noteContent, toast]);
 
   const handleSaveCurrentNote = useCallback(() => {
-    if (!noteContent.trim() && !activeNoteId) { // Don't save completely empty new notes
+    if (!noteTitle.trim()) {
+       toast({
+        title: "Title Required",
+        description: "Note title cannot be blank.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!noteContent.trim() && !activeNoteId) { 
       toast({
         title: "Empty Note",
-        description: "Cannot save an empty new note. Add some content first.",
+        description: "Cannot save an empty new note without content. Add some content first.",
         variant: "destructive",
       });
       return;
@@ -101,30 +111,26 @@ export default function OrgaNotePage() {
         toast({ title: "Error", description: "Could not find active note to save.", variant: "destructive" });
         return;
       }
-      noteToSave = { ...existingNote, content: noteContent, lastModified: Date.now() };
+      noteToSave = { ...existingNote, name: noteTitle.trim(), content: noteContent, lastModified: Date.now() };
       setSavedNotes(prev => prev.map(n => n.id === activeNoteId ? noteToSave : n));
       toast({ title: "Note Updated", description: `"${noteToSave.name}" has been updated.` });
     } else {
-      const noteName = prompt("Enter a name for your new note:", `Note ${new Date().toLocaleDateString()}`);
-      if (!noteName || noteName.trim() === "") {
-        toast({ title: "Save Cancelled", description: "Note name cannot be empty.", variant: "destructive" });
-        return;
-      }
       const newId = Date.now().toString();
-      noteToSave = { id: newId, name: noteName.trim(), content: noteContent, lastModified: Date.now() };
+      noteToSave = { id: newId, name: noteTitle.trim(), content: noteContent, lastModified: Date.now() };
       setSavedNotes(prev => [noteToSave, ...prev]);
-      setActiveNoteId(newId);
+      setActiveNoteId(newId); // Set the new note as active
       toast({ title: "Note Saved", description: `"${noteToSave.name}" has been saved.` });
     }
-  }, [activeNoteId, noteContent, savedNotes, toast]);
+  }, [activeNoteId, noteTitle, noteContent, savedNotes, toast]);
 
   const handleLoadNote = useCallback((noteId: string) => {
     const noteToLoad = savedNotes.find(n => n.id === noteId);
     if (noteToLoad) {
+      setNoteTitle(noteToLoad.name);
       setNoteContent(noteToLoad.content);
       setActiveNoteId(noteId);
-      setSummary(''); // Clear previous summary
-      setKeyTopics(''); // Clear previous key topics
+      setSummary(''); 
+      setKeyTopics(''); 
       toast({ title: "Note Loaded", description: `"${noteToLoad.name}" is now active.` });
     } else {
       toast({ title: "Error", description: "Could not load the selected note.", variant: "destructive" });
@@ -138,7 +144,9 @@ export default function OrgaNotePage() {
     const noteToDelete = savedNotes.find(n => n.id === noteId);
     setSavedNotes(prev => prev.filter(n => n.id !== noteId));
     if (activeNoteId === noteId) {
+      // If active note is deleted, clear editor and set a default title
       setActiveNoteId(null);
+      setNoteTitle('Untitled Note');
       setNoteContent('');
       setSummary('');
       setKeyTopics('');
@@ -148,6 +156,7 @@ export default function OrgaNotePage() {
 
   const handleNewNote = useCallback(() => {
     setActiveNoteId(null);
+    setNoteTitle('Untitled Note'); // Default title for new notes
     setNoteContent('');
     setSummary('');
     setKeyTopics('');
@@ -155,29 +164,35 @@ export default function OrgaNotePage() {
   }, [toast]);
 
   const handleRenameNote = useCallback((noteId: string, newName: string) => {
-    setSavedNotes(prev => prev.map(n => n.id === noteId ? {...n, name: newName, lastModified: Date.now()} : n));
-    toast({ title: "Note Renamed", description: `Note renamed to "${newName}".` });
-  }, [toast]);
+    if(!newName.trim()){
+      toast({ title: "Rename Cancelled", description: "Note name cannot be empty.", variant: "destructive" });
+      return;
+    }
+    setSavedNotes(prev => prev.map(n => n.id === noteId ? {...n, name: newName.trim(), lastModified: Date.now()} : n));
+    if(activeNoteId === noteId) {
+      setNoteTitle(newName.trim()); // Update title in MainWindow if active note is renamed
+    }
+    toast({ title: "Note Renamed", description: `Note renamed to "${newName.trim()}".` });
+  }, [toast, activeNoteId]);
 
-  const activeNoteName = activeNoteId ? savedNotes.find(n => n.id === activeNoteId)?.name : null;
+  const activeNoteDisplayName = activeNoteId ? savedNotes.find(n => n.id === activeNoteId)?.name : null;
 
   return (
     <div 
       className="h-screen w-screen grid 
-                 grid-cols-[1fr_3fr_1fr_0.5fr] 
-                 grid-rows-[auto_auto_1fr_1fr_1fr_auto] 
-                 gap-0.5 bg-black text-white font-['Arial',_sans-serif] overflow-hidden"
+                 grid-cols-[240px_1fr_300px_180px] 
+                 grid-rows-[minmax(320px,auto)_1fr_auto] 
+                 gap-0.5 bg-background text-foreground overflow-hidden"
       style={{ fontFamily: 'Arial, sans-serif' }}
     >
-      {/* Row 1 */}
-      <div className="col-start-1 row-start-1"><LogoSection /></div>
-      <div className="col-start-2 row-start-1"><CalendarSection /></div>
+      {/* Row 1: Top sections */}
+      <div className="col-start-1 row-start-1"><LogoSection onSummarize={handleSummarize} isSummarizing={isSummarizing}/></div>
+      <div className="col-start-2 row-start-1 overflow-hidden"><CalendarSection /></div> {/* Calendar takes full height of this row */}
       <div className="col-start-3 row-start-1"><NotesSection /></div> {/* ToDo List */}
       <div className="col-start-4 row-start-1"><UploadSection /></div>
 
-
-      {/* Row 2 */}
-      <div className="col-start-1 row-start-2 row-span-4 min-h-0">
+      {/* Row 2: Main content areas */}
+      <div className="col-start-1 row-start-2 min-h-0"> {/* Files List */}
         <FilesSection
           savedNotes={savedNotes}
           onLoadNote={handleLoadNote}
@@ -187,25 +202,28 @@ export default function OrgaNotePage() {
           activeNoteId={activeNoteId}
         />
       </div>
-      <div className="col-start-2 row-start-2 row-span-4 min-h-0">
+      <div className="col-start-2 row-start-2 min-h-0"> {/* Main Note Editor Window */}
         <MainWindow
+          noteTitle={noteTitle}
+          setNoteTitle={setNoteTitle}
           noteContent={noteContent}
           setNoteContent={setNoteContent}
           summary={summary}
           keyTopics={keyTopics}
           isSummarizing={isSummarizing}
           onSaveCurrentNote={handleSaveCurrentNote}
-          activeNoteName={activeNoteName}
+          activeNoteName={activeNoteDisplayName}
         />
       </div>
-      <div className="col-start-3 row-start-2"><ExpandSection onSummarize={handleSummarize} isSummarizing={isSummarizing} /></div>
-      <div className="col-start-4 row-start-2 row-span-4 min-h-0"><SidebarRight /></div>
+      <div className="col-start-3 row-start-2 min-h-0"> {/* Project Files Thumbnails */}
+         <ProjectFilesSection savedNotes={savedNotes} onLoadNote={handleLoadNote} />
+      </div>
+      <div className="col-start-4 row-start-2 min-h-0"> {/* Sidebar Right */}
+        <SidebarRight />
+      </div>
       
-      {/* Row 3: AppFilesSection removed, this cell in col 3 is now empty */}
-      {/* Row 4: TraySection removed, this cell in col 3 is now empty */}
-      
-      {/* Row 6 / Footer */}
-      <div className="col-start-1 col-span-4 row-start-6"><Footer /></div>
+      {/* Row 3: Links Section (formerly Footer) */}
+      <div className="col-start-1 col-span-4 row-start-3"><LinksSection /></div>
     </div>
   );
 }

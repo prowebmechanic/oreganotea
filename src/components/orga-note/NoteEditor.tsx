@@ -12,7 +12,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteContent, setNoteContent }) 
       placeholder="Start typing your note here..."
       value={noteContent}
       onChange={(e) => setNoteContent(e.target.value)}
-      className="w-full h-full min-h-[200px] bg-gray-800 text-white border-gray-700 focus:ring-accent focus:border-accent resize-none text-base"
+      className="w-full h-full min-h-[200px] bg-input text-foreground border-border focus:ring-ring focus:border-ring resize-none text-base"
       aria-label="Note editor"
     />
   );

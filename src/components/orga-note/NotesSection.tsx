@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PlusCircle, Trash2 } from 'lucide-react';
 
-const TASKS_STORAGE_KEY = 'orgaNoteTasks';
+const TASKS_STORAGE_KEY = 'oreganoteTasks';
 
 const NotesSection: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -21,7 +21,12 @@ const NotesSection: React.FC = () => {
     if (typeof window !== 'undefined') {
       const storedTasks = localStorage.getItem(TASKS_STORAGE_KEY);
       if (storedTasks) {
-        setTasks(JSON.parse(storedTasks));
+        try {
+          setTasks(JSON.parse(storedTasks));
+        } catch (e) {
+          console.error("Failed to parse tasks from localStorage", e);
+          setTasks([]);
+        }
       }
     }
   }, []);
@@ -57,46 +62,46 @@ const NotesSection: React.FC = () => {
 
   if (!isClient) {
     return (
-      <div className="bg-black p-2.5 border border-white h-full flex flex-col">
-        <div className="border border-white my-0.5 p-1.25 text-base font-semibold">ToDo List</div>
+      <div className="bg-background p-2.5 border border-border h-full flex flex-col">
+        <div className="border border-border my-0.5 p-1.25 text-base font-semibold text-foreground">ToDo List</div>
         <div className="flex-grow p-1.25 text-muted-foreground">Loading tasks...</div>
       </div>
     );
   }
 
   return (
-    <div className="bg-black p-2.5 border border-white h-full flex flex-col text-sm">
-      <div className="border border-white my-0.5 p-1.25 text-base font-semibold">ToDo List</div>
-      <div className="flex gap-1.25 my-1.25 p-1.25 border border-white">
+    <div className="bg-background p-2.5 border border-border h-full flex flex-col text-sm">
+      <div className="border border-border my-0.5 p-1.25 text-base font-semibold text-foreground">ToDo List</div>
+      <div className="flex gap-1.25 my-1.25 p-1.25 border border-border">
         <Input
           type="text"
           placeholder="Add a new task..."
           value={newTaskText}
           onChange={(e) => setNewTaskText(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && handleAddTask()}
-          className="bg-gray-800 text-white border-gray-700 h-8 text-xs"
+          className="bg-input text-foreground border-border h-8 text-xs focus:ring-ring focus:border-ring"
         />
-        <Button onClick={handleAddTask} variant="outline" size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 h-8 text-xs px-2">
+        <Button onClick={handleAddTask} variant="outline" size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 h-8 text-xs px-2 border-border">
           <PlusCircle className="h-3 w-3 mr-1" /> Add
         </Button>
       </div>
-      <ScrollArea className="border border-white my-0.5 p-1.25 flex-grow">
+      <ScrollArea className="border border-border my-0.5 p-1.25 flex-grow">
         {tasks.length === 0 ? (
           <p className="text-muted-foreground text-center py-4 text-xs">No tasks yet. Add one above!</p>
         ) : (
           <ul className="space-y-1.5">
             {tasks.map(task => (
-              <li key={task.id} className="flex items-center justify-between p-1.25 border border-gray-700 rounded-sm hover:bg-gray-800/50">
+              <li key={task.id} className="flex items-center justify-between p-1.25 border border-border rounded-sm hover:bg-secondary/50 bg-card">
                 <div className="flex items-center gap-1.5">
                   <Checkbox
                     id={`task-${task.id}`}
                     checked={task.completed}
                     onCheckedChange={() => handleToggleTask(task.id)}
-                    className="border-gray-600 data-[state=checked]:bg-accent data-[state=checked]:border-accent"
+                    className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground"
                   />
                   <label
                     htmlFor={`task-${task.id}`}
-                    className={`text-xs ${task.completed ? 'line-through text-muted-foreground' : 'text-white'}`}
+                    className={`text-xs ${task.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}
                   >
                     {task.text}
                   </label>

@@ -11,3 +11,9 @@ export interface Task {
   text: string;
   completed: boolean;
 }
+
+export interface LinkItem {
+  id: string;
+  name: string;
+  url: string;
+}

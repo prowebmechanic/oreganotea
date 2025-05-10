@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'OrgaNote',
-  description: 'Create, organize, and summarize your notes with OrgaNote.',
+  title: 'Oreganote',
+  description: 'Create, organize, and summarize your notes with Oreganote.',
 };
 
 export default function RootLayout({
