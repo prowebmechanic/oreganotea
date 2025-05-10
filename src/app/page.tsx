@@ -214,7 +214,7 @@ export default function OreganotePage() {
       </div>
       
       {/* Column 3: Project Files (top), ToDo (bottom) */}
-      <div className="col-start-3 row-start-1 row-span-2 flex flex-col min-h-0 bg-light-blue"> {/* ProjectFiles, spanning R1 (auto) and R2 (1fr) */}
+      <div className="col-start-3 row-start-1 row-span-3 flex flex-col min-h-0 bg-light-blue"> {/* ProjectFiles, spanning R1, R2 (1fr) and R3 (auto) */}
          <ProjectFilesSection 
             savedNotes={savedNotes} 
             onLoadNote={handleLoadNote}
@@ -224,7 +224,7 @@ export default function OreganotePage() {
             onUploadFile={handleUploadFile}
           />
       </div>
-      <div className="col-start-3 row-start-3 flex flex-col min-h-0 bg-light-blue"> {/* ToDo List (NotesSection), in R3 (auto height) */}
+      <div className="col-start-3 row-start-4 flex flex-col min-h-0 bg-light-blue"> {/* ToDo List (NotesSection), in R4 (auto height) */}
         <NotesSection /> 
       </div>
       
@@ -232,7 +232,7 @@ export default function OreganotePage() {
       <div className="col-start-1 col-span-2 row-start-4 bg-secondary"> 
         <LinksSection />
       </div>
-      {/* Col 3, Row 4 is implicitly empty */}
+      {/* Col 3, Row 4 is where NotesSection is now. */}
     </div>
   );
 }
