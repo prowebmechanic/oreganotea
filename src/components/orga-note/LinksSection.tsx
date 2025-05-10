@@ -115,8 +115,7 @@ const LinksSection: React.FC = () => {
 
   return (
     <div className="bg-background p-2.5 flex flex-col h-48">
-      <div className="flex justify-between items-center mb-1">
-        <h3 className="text-lg font-semibold text-primary">Quick Links</h3>
+      <div className="flex items-center gap-4 mb-1"> {/* Changed: alignment and order */}
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
           <DialogTrigger asChild>
             <Button variant="ghost" size="sm" onClick={openDialog} className="text-accent hover:bg-accent/10">
@@ -143,12 +142,13 @@ const LinksSection: React.FC = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        <h3 className="text-lg font-semibold text-primary">Quick Links</h3>
       </div>
       <ScrollArea className="flex-grow">
         {links.length === 0 ? (
           <p className="text-muted-foreground text-center py-4">No links saved yet. Click "Add Link" to get started.</p>
         ) : (
-          <div className="grid grid-cols-2 gap-1"> {/* Changed to 2 columns */}
+          <div className="grid grid-cols-2 gap-1"> {/* Already 2 columns */}
             {links.map(link => (
               <div key={link.id} className="p-1 rounded-md bg-transparent flex items-center justify-between hover:bg-secondary/30 transition-colors group">
                 <a href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-primary hover:underline truncate flex-grow py-1">

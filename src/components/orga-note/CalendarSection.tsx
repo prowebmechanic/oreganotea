@@ -15,7 +15,7 @@ import { ScrollArea } from '../ui/scroll-area';
 const CalendarSection: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date()); // Select today by default
   const [clientMounted, setClientMounted] = useState(false);
-  // Default to May 1st of the current year for the first month, the second will be June
+  // Default to May 1st of the current year for the first month
   const [currentMonthView, setCurrentMonthView] = useState<Date>(new Date(new Date().getFullYear(), 4, 1));
   const [dailyNotes, setDailyNotes] = useState<Record<string, string>>({});
   const [selectedDayNoteText, setSelectedDayNoteText] = useState('');
@@ -134,8 +134,8 @@ const CalendarSection: React.FC = () => {
             onSelect={handleDateSelect}
             className="rounded-md bg-background text-foreground p-0 w-full"
             classNames={{
-              months: "flex flex-col space-y-2 justify-around items-center", // Modified for vertical stacking
-              month: "space-y-1 p-1 border border-border rounded-md w-full max-w-xs", // Ensure month takes full width available, centered
+              months: "flex flex-col space-y-2 justify-around items-center", 
+              month: "space-y-1 p-1 border border-border rounded-md w-full max-w-xs", 
               caption: "flex justify-center pt-1 relative items-center text-primary",
               caption_label: "text-xs font-medium",
               day: "h-6 w-6 text-xs p-0 font-normal text-foreground hover:bg-accent/80 hover:text-accent-foreground relative", 
@@ -148,9 +148,9 @@ const CalendarSection: React.FC = () => {
               nav_button_next: "absolute right-1 top-1",
               table: "w-full", 
               body: "", 
-              row: "flex w-full mt-1 justify-center", // Center days within the row
+              row: "flex w-full mt-1 justify-center", 
             }}
-            numberOfMonths={2}
+            numberOfMonths={1} // Changed from 2 to 1
             pagedNavigation
             month={currentMonthView}
             onMonthChange={handleMonthChange}

@@ -228,8 +228,8 @@ export default function OreganotePage() {
           />
       </div>
       
-      {/* Bottom Row: Links Section */}
-      <div className="col-start-1 col-span-3 row-start-4"> {/* Links */}
+      {/* Bottom Row: Links Section - Adjusted to span 2 columns */}
+      <div className="col-start-1 col-span-2 row-start-4"> {/* Links */}
         <LinksSection />
       </div>
     </div>
