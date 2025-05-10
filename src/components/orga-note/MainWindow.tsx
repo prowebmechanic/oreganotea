@@ -6,7 +6,6 @@ import AiSummaryDisplay from './AiSummaryDisplay';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Save, FilePlus2 } from 'lucide-react'; 
-import { useToast } from "@/hooks/use-toast";
 
 interface MainWindowProps {
   noteTitle: string;
@@ -31,11 +30,10 @@ const MainWindow: React.FC<MainWindowProps> = ({
   onSaveCurrentNote,
   onNewNote,
 }) => {
-  const { toast } = useToast();
 
   return (
-    <div className="bg-background p-2.5 border border-border h-full flex flex-col text-sm">
-      <div className="border border-border my-0.5 p-1.25 text-base font-semibold text-primary flex justify-between items-center">
+    <div className="bg-background p-2.5 border-x border-b border-border h-full flex flex-col text-sm">
+      <div className="my-0.5 p-1.25 text-base font-semibold text-primary flex justify-between items-center">
         <span>Note Editor</span>
         <div className="flex items-center gap-1.5">
           <Button 
@@ -57,7 +55,7 @@ const MainWindow: React.FC<MainWindowProps> = ({
           </Button>
         </div>
       </div>
-      <div className="my-0.5 p-1.25 border border-border">
+      <div className="my-0.5 p-1.25"> {/* Removed border here */}
         <Input 
           type="text"
           placeholder="Enter note title here..."
@@ -67,9 +65,9 @@ const MainWindow: React.FC<MainWindowProps> = ({
           aria-label="Note title"
         />
       </div>
-      <div className="border border-border my-0.5 p-1.25 flex-grow flex flex-col min-h-0">
+      <div className="my-0.5 p-1.25 flex-grow flex flex-col min-h-0"> {/* Removed border here */}
         <NoteEditor noteContent={noteContent} setNoteContent={setNoteContent} />
-        <div className="mt-2 overflow-y-auto">
+        <div className="mt-2 overflow-y-auto"> {/* This div will scroll if AiSummaryDisplay overflows */}
           <AiSummaryDisplay summary={summary} keyTopics={keyTopics} isLoading={isSummarizing} />
         </div>
       </div>

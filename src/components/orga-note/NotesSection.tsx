@@ -62,17 +62,17 @@ const NotesSection: React.FC = () => {
 
   if (!isClient) {
     return (
-      <div className="bg-background p-2.5 border border-border h-full flex flex-col">
-        <div className="border border-border my-0.5 p-1.25 text-base font-semibold text-primary">ToDo List</div>
+      <div className="bg-background p-2.5 border-x border-b border-border h-full flex flex-col">
+        <div className="my-0.5 p-1.25 text-base font-semibold text-primary">ToDo List</div> {/* Removed border */}
         <div className="flex-grow p-1.25 text-muted-foreground">Loading tasks...</div>
       </div>
     );
   }
 
   return (
-    <div className="bg-background p-2.5 border border-border h-full flex flex-col text-sm">
-      <div className="border border-border my-0.5 p-1.25 text-base font-semibold text-primary">ToDo List</div>
-      <div className="flex gap-1.25 my-1.25 p-1.25 border border-border">
+    <div className="bg-background p-2.5 border-x border-b border-border h-full flex flex-col text-sm">
+      <div className="my-0.5 p-1.25 text-base font-semibold text-primary">ToDo List</div> {/* Removed border */}
+      <div className="flex gap-1.25 my-1.25 p-1.25 border border-border"> {/* Input area border remains */}
         <Input
           type="text"
           placeholder="Add a new task..."
@@ -85,7 +85,7 @@ const NotesSection: React.FC = () => {
           <PlusCircle className="h-3 w-3 mr-1" /> Add
         </Button>
       </div>
-      <ScrollArea className="border border-border my-0.5 p-1.25 flex-grow">
+      <ScrollArea className="my-0.5 p-1.25 flex-grow"> {/* Removed border, ScrollArea handles its look */}
         {tasks.length === 0 ? (
           <p className="text-muted-foreground text-center py-4 text-xs">No tasks yet. Add one above!</p>
         ) : (

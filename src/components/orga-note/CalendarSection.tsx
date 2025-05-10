@@ -4,8 +4,7 @@ import type React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { Calendar } from "@/components/ui/calendar";
 import type { DayContentProps } from "react-day-picker";
-import { formatISO, parseISO, isToday } from 'date-fns';
-import { Input } from '@/components/ui/input';
+import { formatISO, isToday } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from "@/hooks/use-toast";
@@ -14,9 +13,9 @@ import { ScrollArea } from '../ui/scroll-area';
 
 
 const CalendarSection: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date()); // Select today by default
   const [clientMounted, setClientMounted] = useState(false);
-  // Default to May 1st of the current year
+  // Default to May 1st of the current year for the first month, the second will be June
   const [currentMonthView, setCurrentMonthView] = useState<Date>(new Date(new Date().getFullYear(), 4, 1));
   const [dailyNotes, setDailyNotes] = useState<Record<string, string>>({});
   const [selectedDayNoteText, setSelectedDayNoteText] = useState('');
@@ -28,8 +27,13 @@ const CalendarSection: React.FC = () => {
     if (typeof window !== 'undefined') {
       const loadedNotes = getDailyCalendarNotes();
       setDailyNotes(loadedNotes);
+      // Load note for today if it exists, or for initially selected date
+      if (selectedDate) {
+        const dateISO = formatISO(selectedDate, { representation: 'date' });
+        setSelectedDayNoteText(loadedNotes[dateISO] || '');
+      }
     }
-  }, []);
+  }, [selectedDate]); // Rerun if selectedDate changes to load its note
 
   useEffect(() => {
     if (clientMounted && typeof window !== 'undefined') {
@@ -71,9 +75,11 @@ const CalendarSection: React.FC = () => {
       toast({ title: "No Note", description: `No note to delete for ${selectedDate.toLocaleDateString()}.`});
       return;
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { [dateISO]: _, ...rest } = dailyNotes;
-    setDailyNotes(rest);
+    
+    const updatedNotes = { ...dailyNotes };
+    delete updatedNotes[dateISO];
+    setDailyNotes(updatedNotes);
+
     setSelectedDayNoteText('');
     toast({ title: "Note Deleted", description: `Note for ${selectedDate.toLocaleDateString()} deleted.` });
   }, [selectedDate, dailyNotes, toast]);
@@ -100,24 +106,26 @@ const CalendarSection: React.FC = () => {
   };
 
   const modifiersClassNames = {
-    hasNote: 'day-with-note', // Custom class for non-today notes
-    todayWithNote: 'day-today-with-note', // Custom class if today has a note
-    // day_today will be applied by default by react-day-picker for styling today
+    hasNote: 'day-with-note', 
+    todayWithNote: 'day-today-with-note', 
   };
 
 
   return (
-    <div className="bg-background p-1 border border-border h-full flex flex-col text-sm">
+    <div className="bg-background p-1 border-x border-b border-border h-full flex flex-col text-sm">
       {clientMounted ? (
         <>
           <style>{`
-            .day-with-note { /* Style for days with notes, not today */
-              /* You can add specific styles here if DayContent isn't enough, e.g. a border */
+            .day-with-note { 
             }
-            .day-today-with-note .rdp-day_today { /* If today also has a note */
-              /* Example: make today's highlight even stronger or a different color */
-              /* background-color: hsl(var(--destructive)) !important; */
-              /* color: hsl(var(--destructive-foreground)) !important; */
+            .day-today-with-note .rdp-day_today { 
+            }
+            .rdp-months {
+              flex-direction: column; /* Ensure months are stacked vertically */
+              align-items: center; /* Center months if they don't fill width */
+            }
+            .rdp-month {
+              margin-bottom: 0.5rem; /* Add space between vertical months */
             }
           `}</style>
           <Calendar
@@ -126,21 +134,21 @@ const CalendarSection: React.FC = () => {
             onSelect={handleDateSelect}
             className="rounded-md bg-background text-foreground p-0 w-full"
             classNames={{
-              months: "flex flex-col sm:flex-row space-y-1 sm:space-x-1 sm:space-y-0 justify-around",
-              month: "space-y-1 p-1 border border-border rounded-md flex-grow flex flex-col",
+              months: "flex flex-col space-y-2 justify-around items-center", // Modified for vertical stacking
+              month: "space-y-1 p-1 border border-border rounded-md w-full max-w-xs", // Ensure month takes full width available, centered
               caption: "flex justify-center pt-1 relative items-center text-primary",
               caption_label: "text-xs font-medium",
-              day: "h-6 w-6 text-xs p-0 font-normal text-foreground hover:bg-accent/80 hover:text-accent-foreground relative", // Added relative for dot positioning
+              day: "h-6 w-6 text-xs p-0 font-normal text-foreground hover:bg-accent/80 hover:text-accent-foreground relative", 
               day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
               day_today: "bg-accent text-accent-foreground ring-1 ring-accent",
               head_cell: "text-muted-foreground rounded-md w-6 font-normal text-[0.7rem]",
-              cell: "h-6 w-6 text-center text-xs p-0 relative", // Ensure cell is relative for absolute positioning of dot
+              cell: "h-6 w-6 text-center text-xs p-0 relative", 
               nav_button: "h-5 w-5 bg-transparent p-0 opacity-75 hover:opacity-100 text-primary hover:bg-accent/20",
               nav_button_previous: "absolute left-1 top-1",
               nav_button_next: "absolute right-1 top-1",
               table: "w-full", 
               body: "", 
-              row: "flex w-full mt-1", 
+              row: "flex w-full mt-1 justify-center", // Center days within the row
             }}
             numberOfMonths={2}
             pagedNavigation
@@ -150,30 +158,36 @@ const CalendarSection: React.FC = () => {
             modifiers={modifiers}
             modifiersClassNames={modifiersClassNames}
           />
-          {selectedDate && (
-            <ScrollArea className="mt-2 p-2 border border-border rounded-md flex-grow min-h-[100px]">
-              <div className="space-y-2">
-                <h4 className="text-xs font-semibold text-primary">
-                  Note for: {selectedDate.toLocaleDateString()}
-                  {isToday(selectedDate) && dailyNotes[formatISO(selectedDate, { representation: 'date' })] && (
-                     <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-destructive text-destructive-foreground">Reminder!</span>
-                  )}
-                </h4>
-                <Textarea
-                  placeholder="Add a note for this day..."
-                  value={selectedDayNoteText}
-                  onChange={(e) => setSelectedDayNoteText(e.target.value)}
-                  className="bg-input text-foreground border-border text-xs h-16"
-                />
-                <div className="flex gap-2">
-                  <Button onClick={handleSaveDailyNote} size="sm" className="text-xs h-7 px-2 bg-primary hover:bg-primary/90 text-primary-foreground">Save Note</Button>
-                  {dailyNotes[formatISO(selectedDate, { representation: 'date' })] && (
-                    <Button onClick={handleDeleteDailyNote} variant="destructive" size="sm" className="text-xs h-7 px-2">Delete Note</Button>
-                  )}
-                </div>
-              </div>
-            </ScrollArea>
-          )}
+          <ScrollArea className="mt-2 p-2 border border-border rounded-md flex-grow min-h-[100px]">
+            <div className="space-y-2">
+              <h4 className="text-xs font-semibold text-primary">
+                {selectedDate ? `Note for: ${selectedDate.toLocaleDateString()}` : 'Select a date to add a note'}
+                {selectedDate && isToday(selectedDate) && dailyNotes[formatISO(selectedDate, { representation: 'date' })] && (
+                   <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-destructive text-destructive-foreground">Reminder!</span>
+                )}
+              </h4>
+              {selectedDate && (
+                <>
+                  <Textarea
+                    placeholder="Add a note for this day..."
+                    value={selectedDayNoteText}
+                    onChange={(e) => setSelectedDayNoteText(e.target.value)}
+                    className="bg-input text-foreground border-border text-xs h-16"
+                    aria-label="Daily note text area"
+                  />
+                  <div className="flex gap-2">
+                    <Button onClick={handleSaveDailyNote} size="sm" className="text-xs h-7 px-2 bg-primary hover:bg-primary/90 text-primary-foreground">Save Note</Button>
+                    {dailyNotes[formatISO(selectedDate, { representation: 'date' })] && (
+                      <Button onClick={handleDeleteDailyNote} variant="destructive" size="sm" className="text-xs h-7 px-2">Delete Note</Button>
+                    )}
+                  </div>
+                </>
+              )}
+              {!selectedDate && (
+                <p className="text-xs text-muted-foreground">Click on a day in the calendar to manage its notes.</p>
+              )}
+            </div>
+          </ScrollArea>
         </>
       ) : (
         <div className="w-full h-full flex items-center justify-center text-muted-foreground">Loading Calendar...</div>

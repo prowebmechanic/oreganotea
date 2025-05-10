@@ -115,11 +115,11 @@ const LinksSection: React.FC = () => {
 
   return (
     <div className="bg-background p-2.5 border-t border-border flex flex-col h-48">
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex justify-between items-center mb-1">
         <h3 className="text-lg font-semibold text-primary">Quick Links</h3>
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" onClick={openDialog} className="bg-accent text-accent-foreground hover:bg-accent/90">
+            <Button variant="ghost" size="sm" onClick={openDialog} className="text-accent hover:bg-accent/10"> {/* Changed to ghost */}
               <PlusCircle className="mr-2 h-4 w-4" /> Add Link
             </Button>
           </DialogTrigger>
@@ -148,19 +148,19 @@ const LinksSection: React.FC = () => {
         {links.length === 0 ? (
           <p className="text-muted-foreground text-center py-4">No links saved yet. Click "Add Link" to get started.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1"> {/* Reduced gap */}
             {links.map(link => (
-              <div key={link.id} className="p-2 border border-border rounded-md bg-card flex items-center justify-between hover:shadow-md transition-shadow">
-                <a href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline truncate flex-grow">
-                  <LinkIcon className="h-4 w-4 shrink-0" />
-                  <span className="truncate" title={link.name}>{link.name}</span>
+              <div key={link.id} className="p-1 rounded-md bg-transparent flex items-center justify-between hover:bg-secondary/30 transition-colors group"> {/* Removed border, reduced padding, changed bg */}
+                <a href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-primary hover:underline truncate flex-grow py-1"> {/* Reduced gap */}
+                  <LinkIcon className="h-3.5 w-3.5 shrink-0" /> {/* Slightly smaller icon */}
+                  <span className="truncate text-sm" title={link.name}>{link.name}</span>
                 </a>
                 <div className='flex shrink-0'>
-                  <Button variant="ghost" size="icon" onClick={() => handleEditLink(link)} className="h-7 w-7 text-muted-foreground hover:text-primary">
-                    <Edit3 className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" onClick={() => handleEditLink(link)} className="h-6 w-6 text-muted-foreground hover:text-primary group-hover:opacity-100 md:opacity-0 transition-opacity">
+                    <Edit3 className="h-3.5 w-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDeleteLink(link.id)} className="h-7 w-7 text-muted-foreground hover:text-destructive">
-                    <Trash2 className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" onClick={() => handleDeleteLink(link.id)} className="h-6 w-6 text-muted-foreground hover:text-destructive group-hover:opacity-100 md:opacity-0 transition-opacity">
+                    <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>

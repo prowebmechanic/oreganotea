@@ -5,14 +5,14 @@ import type { SavedNote } from '@/types/note';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { FileText, Eye, PlusCircle, Trash2, Pencil } from 'lucide-react';
+import { FileText, Eye, PlusCircle, Trash2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
 interface ProjectFilesSectionProps {
   savedNotes: SavedNote[];
   onLoadNote: (noteId: string) => void;
   onDeleteNote: (noteId: string) => void;
-  onRenameNote: (noteId: string, newName: string) => void;
+  onRenameNote: (noteId: string, newName: string) => void; // Kept for type consistency, but UI trigger removed
   activeNoteId: string | null;
   onUploadFile: () => void;
 }
@@ -21,31 +21,21 @@ const ProjectFilesSection: React.FC<ProjectFilesSectionProps> = ({
   savedNotes, 
   onLoadNote,
   onDeleteNote,
-  onRenameNote,
+  // onRenameNote, // Rename functionality trigger removed
   activeNoteId,
   onUploadFile
 }) => {
   const { toast } = useToast();
-
-  const handleRename = (noteId: string, currentName: string | undefined) => {
-    const newName = prompt("Enter new name for the note:", currentName);
-    if (newName === null) return; // User cancelled
-    if (newName.trim() !== "") {
-      onRenameNote(noteId, newName.trim());
-    } else {
-      toast({ title: "Rename Cancelled", description: "Note name cannot be empty.", variant: "destructive" });
-    }
-  };
   
   return (
-    <div className="bg-background p-2.5 border border-border h-full flex flex-col text-sm">
-      <div className="border border-border my-0.5 p-1.25 flex justify-between items-center">
+    <div className="bg-background p-2.5 border-x border-b border-border h-full flex flex-col text-sm">
+      <div className="my-0.5 p-1.25 flex justify-between items-center"> {/* Removed border here */}
         <span className="text-lg font-semibold text-primary">Project Files</span>
         <Button onClick={onUploadFile} variant="outline" size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 h-7 text-xs px-2 border-border">
           <PlusCircle className="h-3 w-3 mr-1" /> Upload
         </Button>
       </div>
-      <ScrollArea className="border border-border my-0.5 p-1.25 flex-grow">
+      <ScrollArea className="my-0.5 p-1.25 flex-grow"> {/* Removed border here, ScrollArea handles its own look */}
         {savedNotes.length === 0 ? (
           <p className="text-muted-foreground text-center py-4">No saved notes to display here yet.</p>
         ) : (
@@ -67,13 +57,11 @@ const ProjectFilesSection: React.FC<ProjectFilesSectionProps> = ({
                     </CardDescription>
                   </div>
                   <div className="flex items-center shrink-0 ml-1 space-x-0.5">
-                     <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onLoadNote(note.id);}} className="h-6 w-6 text-muted-foreground hover:text-primary">
+                     <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onLoadNote(note.id);}} className="h-6 w-6 text-muted-foreground hover:text-primary" title="View Note">
                       <Eye className="h-3 w-3" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleRename(note.id, note.name);}} className="h-6 w-6 text-muted-foreground hover:text-primary">
-                      <Pencil className="h-3 w-3" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onDeleteNote(note.id);}} className="h-6 w-6 text-muted-foreground hover:text-destructive">
+                    {/* Pencil (Rename) button removed as per request */}
+                    <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onDeleteNote(note.id);}} className="h-6 w-6 text-muted-foreground hover:text-destructive" title="Delete Note">
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>

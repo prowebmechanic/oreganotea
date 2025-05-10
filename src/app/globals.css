@@ -9,15 +9,15 @@ body {
 @layer base {
   :root {
     --background: 0 0% 100%; /* white */
-    --foreground: 0 0% 3.9%; /* black */
+    --foreground: 0 0% 3.9%; /* almost black for text */
 
     --card: 0 0% 100%; /* white */
-    --card-foreground: 0 0% 3.9%; /* black */
+    --card-foreground: 0 0% 3.9%; /* almost black */
 
     --popover: 0 0% 100%; /* white */
-    --popover-foreground: 0 0% 3.9%; /* black */
+    --popover-foreground: 0 0% 3.9%; /* almost black */
 
-    --primary: 220 70% 50%; /* dark blue */
+    --primary: 221 83% 53%; /* dark blue */
     --primary-foreground: 0 0% 100%; /* white */
 
     --secondary: 0 0% 96.1%; /* light grey */
@@ -26,7 +26,7 @@ body {
     --muted: 0 0% 96.1%; /* light grey */
     --muted-foreground: 0 0% 45.1%; /* medium grey for text on muted */
 
-    --accent: 25 95% 50%; /* orange */
+    --accent: 30 100% 50%; /* orange */
     --accent-foreground: 0 0% 100%; /* white - for text on orange */
     
     --destructive: 0 84.2% 60.2%; /* red */
@@ -34,7 +34,7 @@ body {
 
     --border: 0 0% 0%; /* black */
     --input: 0 0% 98%; /* very light grey for input background, border will be --border */
-    --ring: 25 95% 50%; /* orange for focus rings */
+    --ring: 30 100% 50%; /* orange for focus rings */
 
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
@@ -43,20 +43,21 @@ body {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
 
-    /* Sidebar variables, will adopt the main theme more closely */
-    --sidebar-background: 0 0% 98%; /* light grey, similar to secondary */
-    --sidebar-foreground: 0 0% 9%;   /* dark grey text */
-    --sidebar-primary: 220 70% 50%; /* dark blue */
+    /* Sidebar variables */
+    --sidebar-background: 0 0% 100%; /* white */
+    --sidebar-foreground: 0 0% 3.9%;   /* almost black text */
+    --sidebar-primary: 221 83% 53%; /* dark blue */
     --sidebar-primary-foreground: 0 0% 100%; /* white */
-    --sidebar-accent: 25 95% 50%; /* orange */
+    --sidebar-accent: 30 100% 50%; /* orange */
     --sidebar-accent-foreground: 0 0% 100%; /* white */
-    --sidebar-border: 0 0% 80%; /* slightly lighter black/grey for sidebar internal borders */
-    --sidebar-ring: 25 95% 50%; /* orange */
+    --sidebar-border: 0 0% 87%; /* lighter grey for sidebar internal borders, as black might be too harsh */
+    --sidebar-ring: 30 100% 50%; /* orange */
   }
 
   .dark {
-    --background: 240 10% 3.9%; /* dark blue-grey */
-    --foreground: 0 0% 98%; /* light text */
+    /* Dark mode remains, but might need adjustments if dark mode is actively used later */
+    --background: 240 10% 3.9%; 
+    --foreground: 0 0% 98%; 
 
     --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
@@ -64,24 +65,24 @@ body {
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 220 70% 60%; /* slightly lighter dark blue for dark mode */
+    --primary: 221 73% 63%; /* Lighter blue for dark mode */
     --primary-foreground: 0 0% 100%; 
 
-    --secondary: 240 4% 12%; /* darker grey */
+    --secondary: 240 4% 12%; 
     --secondary-foreground: 0 0% 98%;
 
     --muted: 240 4% 12%;
     --muted-foreground: 0 0% 63.9%;
 
-    --accent: 25 85% 55%; /* slightly adjusted orange for dark mode */
-    --accent-foreground: 0 0% 3.9%; /* black text on orange for dark mode if contrast is better */
+    --accent: 30 90% 55%; /* Slightly adjusted orange for dark mode */
+    --accent-foreground: 0 0% 100%; 
 
-    --destructive: 0 70% 50%; /* adjusted red for dark mode */
+    --destructive: 0 70% 50%; 
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 14.9%; /* dark grey border */
-    --input: 240 4% 10%; /* very dark grey for input background */
-    --ring: 25 85% 55%; /* orange for focus rings */
+    --border: 0 0% 14.9%; 
+    --input: 240 4% 10%; 
+    --ring: 30 90% 55%; 
 
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
@@ -89,14 +90,14 @@ body {
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
 
-    --sidebar-background: 240 6% 10%; /* dark bg for sidebar */
-    --sidebar-foreground: 0 0% 95%;   /* light text */
-    --sidebar-primary: 220 70% 60%;
+    --sidebar-background: 240 6% 10%; 
+    --sidebar-foreground: 0 0% 95%;   
+    --sidebar-primary: 221 73% 63%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 25 85% 55%;
-    --sidebar-accent-foreground: 0 0% 3.9%;
+    --sidebar-accent: 30 90% 55%;
+    --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 20%; 
-    --sidebar-ring: 25 85% 55%;
+    --sidebar-ring: 30 90% 55%;
   }
 }
 

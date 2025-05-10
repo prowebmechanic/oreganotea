@@ -158,6 +158,8 @@ export default function OreganotePage() {
     toast({ title: "New Note Ready", description: "Editor cleared for a new note." });
   }, [toast]);
 
+  // Rename functionality is being removed from UI, so this handler is currently not called.
+  // Kept for potential future use or if a different UI trigger for renaming is added.
   const handleRenameNote = useCallback((noteId: string, newName: string) => {
     if(!newName.trim()){
       toast({ title: "Rename Cancelled", description: "Note name cannot be empty.", variant: "destructive" });
@@ -185,7 +187,7 @@ export default function OreganotePage() {
       style={{ fontFamily: 'Arial, sans-serif' }}
     >
       {/* Column 1: Logo and Calendar */}
-      <div className="col-start-1 row-start-1">
+      <div className="col-start-1 row-start-1 border-r border-border">
         <LogoSection 
           onSummarize={handleSummarize} 
           isSummarizing={isSummarizing}
@@ -194,10 +196,12 @@ export default function OreganotePage() {
           onSendShare={handleSendShare}
         />
       </div>
-      <div className="col-start-1 row-start-2 overflow-auto min-h-0"><CalendarSection /></div>
+      <div className="col-start-1 row-start-2 overflow-auto min-h-0 border-r border-border">
+        <CalendarSection />
+      </div>
 
       {/* Column 2: Main Note Editor */}
-      <div className="col-start-2 row-start-1 row-span-2 min-h-0">
+      <div className="col-start-2 row-start-1 row-span-2 min-h-0 border-r border-border">
         <MainWindow
           noteTitle={noteTitle}
           setNoteTitle={setNoteTitle}
@@ -217,15 +221,19 @@ export default function OreganotePage() {
             savedNotes={savedNotes} 
             onLoadNote={handleLoadNote}
             onDeleteNote={handleDeleteNote}
-            onRenameNote={handleRenameNote}
+            onRenameNote={handleRenameNote} // Prop remains, but UI trigger is removed
             activeNoteId={activeNoteId}
             onUploadFile={handleUploadFile}
           />
       </div>
-       <div className="col-start-3 row-start-2 overflow-auto min-h-0"><NotesSection /></div>
+       <div className="col-start-3 row-start-2 overflow-auto min-h-0">
+        <NotesSection />
+      </div>
       
       {/* Bottom Row: Links Section */}
-      <div className="col-start-1 col-span-3 row-start-3"><LinksSection /></div>
+      <div className="col-start-1 col-span-3 row-start-3 border-t border-border">
+        <LinksSection />
+      </div>
     </div>
   );
 }
