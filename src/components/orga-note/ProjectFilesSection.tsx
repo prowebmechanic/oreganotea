@@ -2,11 +2,10 @@
 'use client';
 import type React from 'react';
 import type { SavedNote } from '@/types/note';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; // Removed CardDescription
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { FileText, Eye, PlusCircle, Trash2 } from 'lucide-react';
-// Removed useToast as it's not used here anymore directly
+import { Eye, PlusCircle, Trash2 } from 'lucide-react'; // Removed FileText
 
 interface ProjectFilesSectionProps {
   savedNotes: SavedNote[];
@@ -25,10 +24,9 @@ const ProjectFilesSection: React.FC<ProjectFilesSectionProps> = ({
   activeNoteId,
   onUploadFile
 }) => {
-  // const { toast } = useToast(); // Not used
   
   return (
-    <div className="bg-transparent p-2.5 h-full flex flex-col text-sm"> {/* Changed bg-background to bg-transparent */}
+    <div className="bg-transparent p-2.5 h-full flex flex-col text-sm"> 
       <div className="my-0.5 p-1.25 flex justify-between items-center">
         <span className="text-lg font-semibold text-primary">Project Files</span>
         <Button onClick={onUploadFile} variant="outline" size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 h-7 text-xs px-2">
@@ -47,14 +45,13 @@ const ProjectFilesSection: React.FC<ProjectFilesSectionProps> = ({
                 data-ai-hint="document paper"
               >
                 <CardHeader className="p-2 flex flex-row items-center justify-between">
-                  <div onClick={() => onLoadNote(note.id)} className="cursor-pointer flex-grow overflow-hidden mr-1"> {/* Added mr-1 for spacing */}
-                    <CardTitle className="text-sm text-primary flex items-center">
-                      <FileText className="mr-1.5 h-4 w-4 shrink-0" />
-                      <span className="flex-1 min-w-0 truncate" title={note.name}> {/* Adjusted for better truncation */}
+                  <div onClick={() => onLoadNote(note.id)} className="cursor-pointer flex-grow overflow-hidden mr-1"> 
+                    <CardTitle className="text-base font-semibold text-primary flex items-center"> {/* Changed text-sm to text-base font-semibold */}
+                      {/* FileText icon removed */}
+                      <span className="flex-1 min-w-0 truncate" title={note.name}> 
                         {note.name}
                       </span>
                     </CardTitle>
-                    {/* CardDescription with Mod date removed */}
                   </div>
                   <div className="flex items-center shrink-0 space-x-0.5">
                      <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onLoadNote(note.id);}} className="h-6 w-6 text-muted-foreground hover:text-primary" title="View Note">
