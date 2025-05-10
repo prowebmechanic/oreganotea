@@ -13,9 +13,8 @@ import { ScrollArea } from '../ui/scroll-area';
 
 
 const CalendarSection: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date()); // Select today by default
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date()); 
   const [clientMounted, setClientMounted] = useState(false);
-  // Default to May 1st of the current year for the first month
   const [currentMonthView, setCurrentMonthView] = useState<Date>(new Date(new Date().getFullYear(), 4, 1));
   const [dailyNotes, setDailyNotes] = useState<Record<string, string>>({});
   const [selectedDayNoteText, setSelectedDayNoteText] = useState('');
@@ -27,13 +26,12 @@ const CalendarSection: React.FC = () => {
     if (typeof window !== 'undefined') {
       const loadedNotes = getDailyCalendarNotes();
       setDailyNotes(loadedNotes);
-      // Load note for today if it exists, or for initially selected date
       if (selectedDate) {
         const dateISO = formatISO(selectedDate, { representation: 'date' });
         setSelectedDayNoteText(loadedNotes[dateISO] || '');
       }
     }
-  }, [selectedDate]); // Rerun if selectedDate changes to load its note
+  }, [selectedDate]); 
 
   useEffect(() => {
     if (clientMounted && typeof window !== 'undefined') {
@@ -112,7 +110,7 @@ const CalendarSection: React.FC = () => {
 
 
   return (
-    <div className="bg-background p-1 h-full flex flex-col text-sm">
+    <div className="bg-transparent p-1 h-full flex flex-col text-sm"> {/* Changed bg-background to bg-transparent */}
       {clientMounted ? (
         <>
           <style>{`
@@ -121,21 +119,21 @@ const CalendarSection: React.FC = () => {
             .day-today-with-note .rdp-day_today { 
             }
             .rdp-months {
-              flex-direction: column; /* Ensure months are stacked vertically */
-              align-items: center; /* Center months if they don't fill width */
+              flex-direction: column; 
+              align-items: center; 
             }
             .rdp-month {
-              margin-bottom: 0.5rem; /* Add space between vertical months */
+              margin-bottom: 0.5rem; 
             }
           `}</style>
           <Calendar
             mode="single"
             selected={selectedDate}
             onSelect={handleDateSelect}
-            className="rounded-md bg-background text-foreground p-0 w-full"
+            className="rounded-md bg-card text-foreground p-0 w-full" // bg-card for calendar itself
             classNames={{
               months: "flex flex-col space-y-2 justify-around items-center", 
-              month: "space-y-1 p-1 border border-border rounded-md w-full max-w-xs", 
+              month: "space-y-1 p-1 border border-border rounded-md w-full max-w-xs bg-card", // bg-card for month
               caption: "flex justify-center pt-1 relative items-center text-primary",
               caption_label: "text-xs font-medium",
               day: "h-6 w-6 text-xs p-0 font-normal text-foreground hover:bg-accent/80 hover:text-accent-foreground relative", 
@@ -150,7 +148,7 @@ const CalendarSection: React.FC = () => {
               body: "", 
               row: "flex w-full mt-1 justify-center", 
             }}
-            numberOfMonths={1} // Changed from 2 to 1
+            numberOfMonths={1} 
             pagedNavigation
             month={currentMonthView}
             onMonthChange={handleMonthChange}
@@ -158,7 +156,7 @@ const CalendarSection: React.FC = () => {
             modifiers={modifiers}
             modifiersClassNames={modifiersClassNames}
           />
-          <ScrollArea className="mt-2 p-2 border border-border rounded-md flex-grow min-h-[100px]">
+          <ScrollArea className="mt-2 p-2 border border-border rounded-md flex-grow min-h-[100px] bg-card"> {/* bg-card for scroll area */}
             <div className="space-y-2">
               <h4 className="text-xs font-semibold text-primary">
                 {selectedDate ? `Note for: ${selectedDate.toLocaleDateString()}` : 'Select a date to add a note'}

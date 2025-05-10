@@ -62,7 +62,7 @@ const NotesSection: React.FC = () => {
 
   if (!isClient) {
     return (
-      <div className="bg-background p-2.5 h-full flex flex-col">
+      <div className="bg-transparent p-2.5 h-full flex flex-col"> {/* Changed bg-background to bg-transparent */}
         <div className="my-0.5 p-1.25 text-base font-semibold text-primary">ToDo List</div>
         <div className="flex-grow p-1.25 text-muted-foreground">Loading tasks...</div>
       </div>
@@ -70,9 +70,9 @@ const NotesSection: React.FC = () => {
   }
 
   return (
-    <div className="bg-background p-2.5 h-full flex flex-col text-sm">
+    <div className="bg-transparent p-2.5 h-full flex flex-col text-sm"> {/* Changed bg-background to bg-transparent */}
       <div className="my-0.5 p-1.25 text-base font-semibold text-primary">ToDo List</div>
-      <div className="flex gap-1.25 my-1.25 p-1.25 border border-border"> 
+      <div className="flex gap-1.25 my-1.25 p-1.25 border border-border bg-card"> {/* Added bg-card for this sub-section */}
         <Input
           type="text"
           placeholder="Add a new task..."
@@ -85,7 +85,7 @@ const NotesSection: React.FC = () => {
           <PlusCircle className="h-3 w-3 mr-1" /> Add
         </Button>
       </div>
-      <ScrollArea className="my-0.5 p-1.25 flex-grow">
+      <ScrollArea className="my-0.5 p-1.25 flex-grow bg-card rounded-md border border-border"> {/* Added bg-card and border for ScrollArea */}
         {tasks.length === 0 ? (
           <p className="text-muted-foreground text-center py-4 text-xs">No tasks yet. Add one above!</p>
         ) : (

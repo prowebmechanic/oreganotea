@@ -2,17 +2,17 @@
 'use client';
 import type React from 'react';
 import type { SavedNote } from '@/types/note';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; // Removed CardDescription
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { FileText, Eye, PlusCircle, Trash2 } from 'lucide-react';
-import { useToast } from "@/hooks/use-toast";
+// Removed useToast as it's not used here anymore directly
 
 interface ProjectFilesSectionProps {
   savedNotes: SavedNote[];
   onLoadNote: (noteId: string) => void;
   onDeleteNote: (noteId: string) => void;
-  onRenameNote: (noteId: string, newName: string) => void; // Kept for type consistency, but UI trigger removed
+  onRenameNote: (noteId: string, newName: string) => void; 
   activeNoteId: string | null;
   onUploadFile: () => void;
 }
@@ -21,14 +21,14 @@ const ProjectFilesSection: React.FC<ProjectFilesSectionProps> = ({
   savedNotes, 
   onLoadNote,
   onDeleteNote,
-  // onRenameNote, // Rename functionality trigger removed
+  // onRenameNote, // Rename functionality UI trigger removed
   activeNoteId,
   onUploadFile
 }) => {
-  const { toast } = useToast();
+  // const { toast } = useToast(); // Not used
   
   return (
-    <div className="bg-background p-2.5 h-full flex flex-col text-sm">
+    <div className="bg-transparent p-2.5 h-full flex flex-col text-sm"> {/* Changed bg-background to bg-transparent */}
       <div className="my-0.5 p-1.25 flex justify-between items-center">
         <span className="text-lg font-semibold text-primary">Project Files</span>
         <Button onClick={onUploadFile} variant="outline" size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 h-7 text-xs px-2">
@@ -47,20 +47,19 @@ const ProjectFilesSection: React.FC<ProjectFilesSectionProps> = ({
                 data-ai-hint="document paper"
               >
                 <CardHeader className="p-2 flex flex-row items-center justify-between">
-                  <div onClick={() => onLoadNote(note.id)} className="cursor-pointer flex-grow overflow-hidden">
+                  <div onClick={() => onLoadNote(note.id)} className="cursor-pointer flex-grow overflow-hidden mr-1"> {/* Added mr-1 for spacing */}
                     <CardTitle className="text-sm text-primary flex items-center">
                       <FileText className="mr-1.5 h-4 w-4 shrink-0" />
-                      <span className="truncate" title={note.name}>{note.name}</span>
+                      <span className="flex-1 min-w-0 truncate" title={note.name}> {/* Adjusted for better truncation */}
+                        {note.name}
+                      </span>
                     </CardTitle>
-                    <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                      Mod: {new Date(note.lastModified).toLocaleDateString()}
-                    </CardDescription>
+                    {/* CardDescription with Mod date removed */}
                   </div>
-                  <div className="flex items-center shrink-0 ml-1 space-x-0.5">
+                  <div className="flex items-center shrink-0 space-x-0.5">
                      <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onLoadNote(note.id);}} className="h-6 w-6 text-muted-foreground hover:text-primary" title="View Note">
                       <Eye className="h-3 w-3" />
                     </Button>
-                    {/* Pencil (Rename) button removed as per request */}
                     <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onDeleteNote(note.id);}} className="h-6 w-6 text-muted-foreground hover:text-destructive" title="Delete Note">
                       <Trash2 className="h-3 w-3" />
                     </Button>

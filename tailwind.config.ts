@@ -50,6 +50,10 @@ export default {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			},
+        'light-blue': {
+          DEFAULT: 'hsl(var(--light-blue-bg))',
+          foreground: 'hsl(var(--light-blue-bg-foreground))'
+        },
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
   				foreground: 'hsl(var(--sidebar-foreground))',

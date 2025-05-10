@@ -27,7 +27,7 @@ const LogoSection: React.FC<LogoSectionProps> = ({
   onSendShare 
 }) => {
   return (
-    <div className="bg-background p-2.5 h-auto flex flex-col items-center justify-start">
+    <div className="bg-transparent p-2.5 h-auto flex flex-col items-center justify-start"> {/* Changed bg-background to bg-transparent */}
       <h1 className="text-2xl font-bold text-primary mb-2">Oreganote</h1>
       
       <div className="flex flex-col space-y-1.5 w-full px-1">

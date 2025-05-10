@@ -20,7 +20,7 @@ body {
     --primary: 221 83% 53%; /* dark blue */
     --primary-foreground: 0 0% 100%; /* white */
 
-    --secondary: 0 0% 96.1%; /* light grey */
+    --secondary: 0 0% 96.1%; /* light grey - Used for "grey" box backgrounds */
     --secondary-foreground: 0 0% 9%; /* dark grey for text on secondary */
 
     --muted: 0 0% 96.1%; /* light grey */
@@ -32,7 +32,7 @@ body {
     --destructive: 0 84.2% 60.2%; /* red */
     --destructive-foreground: 0 0% 98%; /* white/light text on red */
 
-    --border: 0 0% 87%; /* Lighter grey for general borders (was black) */
+    --border: 0 0% 87%; /* Lighter grey for general borders */
     --input: 0 0% 98%; /* very light grey for input background, border will be --border */
     --ring: 30 100% 50%; /* orange for focus rings */
 
@@ -42,6 +42,10 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+
+    /* Custom light blue for box backgrounds */
+    --light-blue-bg: 200 100% 92%; /* A very light, pastel blue */
+    --light-blue-bg-foreground: 0 0% 3.9%; /* Text color for light blue bg */
 
     /* Sidebar variables */
     --sidebar-background: 0 0% 100%; /* white */
@@ -55,7 +59,6 @@ body {
   }
 
   .dark {
-    /* Dark mode remains, but might need adjustments if dark mode is actively used later */
     --background: 240 10% 3.9%; 
     --foreground: 0 0% 98%; 
 
@@ -65,22 +68,22 @@ body {
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 221 73% 63%; /* Lighter blue for dark mode */
+    --primary: 221 73% 63%; 
     --primary-foreground: 0 0% 100%; 
 
-    --secondary: 240 4% 12%; 
+    --secondary: 240 4% 12%; /* Darker grey for "grey" box backgrounds in dark mode */
     --secondary-foreground: 0 0% 98%;
 
     --muted: 240 4% 12%;
     --muted-foreground: 0 0% 63.9%;
 
-    --accent: 30 90% 55%; /* Slightly adjusted orange for dark mode */
+    --accent: 30 90% 55%; 
     --accent-foreground: 0 0% 100%; 
 
     --destructive: 0 70% 50%; 
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 25%; /* Darker grey for borders in dark mode */
+    --border: 0 0% 25%; 
     --input: 240 4% 10%; 
     --ring: 30 90% 55%; 
 
@@ -89,6 +92,10 @@ body {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    /* Custom light blue for dark mode */
+    --light-blue-bg: 200 30% 18%; /* A darker, muted blue for dark mode */
+    --light-blue-bg-foreground: 0 0% 98%;
 
     --sidebar-background: 240 6% 10%; 
     --sidebar-foreground: 0 0% 95%;   
@@ -102,15 +109,13 @@ body {
 }
 
 @layer base {
-  /* Removed: * { @apply border-border; } */
   body {
     @apply bg-background text-foreground;
   }
-  /* Ensure inputs use theme variables correctly and have a border */
   input, textarea, select {
     @apply bg-input text-foreground border border-border;
   }
   button {
-    @apply ring-ring; /* Ensure focus rings use the theme's ring color */
+    @apply ring-ring; 
   }
 }

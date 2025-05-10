@@ -32,7 +32,7 @@ const MainWindow: React.FC<MainWindowProps> = ({
 }) => {
 
   return (
-    <div className="bg-background p-2.5 h-full flex flex-col text-sm">
+    <div className="bg-transparent p-2.5 h-full flex flex-col text-sm"> {/* Changed bg-background to bg-transparent */}
       <div className="my-0.5 p-1.25 text-base font-semibold text-primary flex justify-between items-center">
         <span>Note Editor</span>
         <div className="flex items-center gap-1.5">

@@ -184,8 +184,8 @@ export default function OreganotePage() {
                  gap-0.5 bg-background text-foreground overflow-hidden"
       style={{ fontFamily: 'Arial, sans-serif' }}
     >
-      {/* Column 1: Logo, Calendar, ToDo List */}
-      <div className="col-start-1 row-start-1"> {/* Logo */}
+      {/* Column 1: Logo, Calendar */}
+      <div className="col-start-1 row-start-1 bg-secondary"> {/* Logo */}
         <LogoSection 
           onSummarize={handleSummarize} 
           isSummarizing={isSummarizing}
@@ -194,15 +194,12 @@ export default function OreganotePage() {
           onSendShare={handleSendShare}
         />
       </div>
-      <div className="col-start-1 row-start-2 flex flex-col min-h-0"> {/* Calendar */}
+      <div className="col-start-1 row-start-2 row-span-2 flex flex-col min-h-0 bg-light-blue"> {/* Calendar, spanning R2 and R3 */}
         <CalendarSection />
-      </div>
-      <div className="col-start-1 row-start-3 flex flex-col min-h-0"> {/* ToDo List */}
-        <NotesSection />
       </div>
       
       {/* Column 2: Main Note Editor Window */}
-      <div className="col-start-2 row-start-1 row-span-3 flex flex-col min-h-0"> {/* MainWindow */}
+      <div className="col-start-2 row-start-1 row-span-3 flex flex-col min-h-0 bg-secondary"> {/* MainWindow, spanning R1, R2, R3 */}
         <MainWindow
           noteTitle={noteTitle}
           setNoteTitle={setNoteTitle}
@@ -216,20 +213,23 @@ export default function OreganotePage() {
         />
       </div>
       
-      {/* Column 3: Project Files (Full Height) */}
-      <div className="col-start-3 row-start-1 row-span-3 flex flex-col min-h-0"> {/* ProjectFiles */}
+      {/* Column 3: Project Files (top), ToDo (bottom) */}
+      <div className="col-start-3 row-start-1 row-span-2 flex flex-col min-h-0 bg-light-blue"> {/* ProjectFiles, spanning R1 and R2 */}
          <ProjectFilesSection 
             savedNotes={savedNotes} 
             onLoadNote={handleLoadNote}
             onDeleteNote={handleDeleteNote}
-            onRenameNote={handleRenameNote}
+            onRenameNote={handleRenameNote} // Kept for type consistency if needed later
             activeNoteId={activeNoteId}
             onUploadFile={handleUploadFile}
           />
       </div>
+      <div className="col-start-3 row-start-3 flex flex-col min-h-0 bg-light-blue"> {/* ToDo List (NotesSection), in R3 */}
+        <NotesSection /> {/* This is the ToDo List */}
+      </div>
       
-      {/* Bottom Row: Links Section - Adjusted to span 2 columns */}
-      <div className="col-start-1 col-span-2 row-start-4"> {/* Links */}
+      {/* Bottom Row: Links Section - Spanning C1 and C2, in R4 */}
+      <div className="col-start-1 col-span-2 row-start-4 bg-secondary"> 
         <LinksSection />
       </div>
     </div>
