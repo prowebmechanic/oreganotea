@@ -10,6 +10,7 @@ import ProjectFilesSection from '@/components/orga-note/ProjectFilesSection';
 import LinksSection from '@/components/orga-note/LinksSection';
 
 import { summarizeNote, type SummarizeNoteInput } from '@/ai/flows/summarize-note';
+import { saveToDrive, type SaveToDriveInput } from '@/ai/flows/save-to-drive';
 import { useToast } from "@/hooks/use-toast";
 import type { SavedNote } from '@/types/note';
 import { getSavedNotes, saveNotes as saveNotesToStorage } from '@/lib/localStorage';
@@ -20,6 +21,7 @@ export default function OreganotePage() {
   const [summary, setSummary] = useState<string>('');
   const [keyTopics, setKeyTopics] = useState<string>('');
   const [isSummarizing, setIsSummarizing] = useState<boolean>(false);
+  const [isSavingToDrive, setIsSavingToDrive] = useState<boolean>(false);
   
   const [savedNotes, setSavedNotes] = useState<SavedNote[]>([]);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
@@ -171,7 +173,68 @@ export default function OreganotePage() {
   }, [toast, activeNoteId]);
 
   const handleMakeHtml = () => toast({ title: "Make HTML", description: "Functionality to convert note to HTML coming soon!" });
-  const handleSaveToDrive = () => toast({ title: "Save to Drive", description: "Functionality to save to Google Drive coming soon!" });
+  
+  const handleSaveToDrive = useCallback(async () => {
+    if (!noteTitle.trim() && !noteContent.trim()) {
+      toast({
+        title: "Empty Note",
+        description: "Cannot save an empty note to Drive. Add a title or content.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsSavingToDrive(true);
+    try {
+      // IMPORTANT: In a real application, you would obtain the accessToken
+      // through a proper OAuth2 flow with Google.
+      // This is a placeholder and will likely fail without a valid token.
+      const placeholderAccessToken = 'YOUR_GOOGLE_OAUTH_ACCESS_TOKEN'; 
+                                    // Replace with a real token for testing or implement OAuth.
+      
+      if (placeholderAccessToken === 'YOUR_GOOGLE_OAUTH_ACCESS_TOKEN') {
+         toast({
+          title: "Authentication Required",
+          description: "Google Drive integration requires authentication. Please implement OAuth2 flow.",
+          variant: "destructive",
+          duration: 7000,
+        });
+        // For now, we'll proceed to show how the flow would be called if a token was present.
+        // In a real app, you might return here or initiate the OAuth flow.
+      }
+
+      const input: SaveToDriveInput = { 
+        noteTitle: noteTitle || 'Untitled Oreganote', 
+        noteContent,
+        accessToken: placeholderAccessToken 
+      };
+      
+      const result = await saveToDrive(input);
+      
+      toast({
+        title: "Saved to Google Drive",
+        description: `Note "${result.fileName}" saved. File ID: ${result.fileId}. ${result.webViewLink ? `View: ${result.webViewLink}` : ''}`,
+        duration: 7000,
+        action: result.webViewLink ? (
+          <a href={result.webViewLink} target="_blank" rel="noopener noreferrer" className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-background px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+            Open in Drive
+          </a>
+        ) : undefined,
+      });
+
+    } catch (error: any) {
+      console.error('Error saving note to Google Drive:', error);
+      toast({
+        title: "Save to Drive Failed",
+        description: error.message || "An error occurred while saving the note to Google Drive.",
+        variant: "destructive",
+        duration: 7000,
+      });
+    } finally {
+      setIsSavingToDrive(false);
+    }
+  }, [noteTitle, noteContent, toast]);
+
+
   const handleSendShare = () => toast({ title: "Send & Share", description: "Functionality to send or share note coming soon!" });
   const handleUploadFile = () => toast({ title: "Upload File", description: "File upload functionality coming soon!" });
 
@@ -190,7 +253,7 @@ export default function OreganotePage() {
           onSummarize={handleSummarize} 
           isSummarizing={isSummarizing}
           onMakeHtml={handleMakeHtml}
-          onSaveToDrive={handleSaveToDrive}
+          onSaveToDrive={isSavingToDrive ? () => {} : handleSaveToDrive} // Disable button while saving
           onSendShare={handleSendShare}
         />
       </div>

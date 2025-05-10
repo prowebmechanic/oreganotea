@@ -11,6 +11,27 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Settings, Sparkles, FileText, UploadCloud, LogOut, HelpCircle, FileCode, Save, Send } from 'lucide-react';
 
+// Inline SVG for a spice bottle icon
+const SpiceBottleIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="text-green-600 mr-1" 
+  >
+    <path d="M15 3h- ilaç bottle .5a2.5 2.5 0 0 0-5 0H7.5a1 1 0 0 0-1 1V7h11V4a1 1 0 0 0-1-1Z" />
+    <path d="M7.5 7h9v11a2.5 2.5 0 0 1-2.5 2.5h-4A2.5 2.5 0 0 1 7.5 18V7Z" />
+    <path d="M10 11h4" />
+  </svg>
+);
+
+
 interface LogoSectionProps {
   onSummarize: () => void;
   isSummarizing: boolean;
@@ -27,8 +48,12 @@ const LogoSection: React.FC<LogoSectionProps> = ({
   onSendShare 
 }) => {
   return (
-    <div className="bg-transparent p-2.5 h-auto flex flex-col items-center justify-start"> {/* Changed bg-background to bg-transparent */}
-      <h1 className="text-2xl font-bold text-primary mb-2">Oreganote</h1>
+    <div className="bg-transparent p-2.5 h-auto flex flex-col items-center justify-start">
+      <h1 className="text-2xl font-bold text-primary mb-2 flex items-center">
+        <span style={{ color: 'forestgreen' }} className="mr-0.5">Orega</span>
+        <SpiceBottleIcon />
+        note
+      </h1>
       
       <div className="flex flex-col space-y-1.5 w-full px-1">
         <DropdownMenu>
