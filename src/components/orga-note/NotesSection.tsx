@@ -63,7 +63,7 @@ const NotesSection: React.FC = () => {
   if (!isClient) {
     return (
       <div className="bg-background p-2.5 border border-border h-full flex flex-col">
-        <div className="border border-border my-0.5 p-1.25 text-base font-semibold text-foreground">ToDo List</div>
+        <div className="border border-border my-0.5 p-1.25 text-base font-semibold text-primary">ToDo List</div>
         <div className="flex-grow p-1.25 text-muted-foreground">Loading tasks...</div>
       </div>
     );
@@ -71,7 +71,7 @@ const NotesSection: React.FC = () => {
 
   return (
     <div className="bg-background p-2.5 border border-border h-full flex flex-col text-sm">
-      <div className="border border-border my-0.5 p-1.25 text-base font-semibold text-foreground">ToDo List</div>
+      <div className="border border-border my-0.5 p-1.25 text-base font-semibold text-primary">ToDo List</div>
       <div className="flex gap-1.25 my-1.25 p-1.25 border border-border">
         <Input
           type="text"

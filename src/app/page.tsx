@@ -3,15 +3,11 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import LogoSection from '@/components/orga-note/LogoSection';
-import FilesSection from '@/components/orga-note/FilesSection';
 import CalendarSection from '@/components/orga-note/CalendarSection';
 import MainWindow from '@/components/orga-note/MainWindow';
 import NotesSection from '@/components/orga-note/NotesSection';
 import ProjectFilesSection from '@/components/orga-note/ProjectFilesSection';
-import SidebarRight from '@/components/orga-note/SidebarRight';
-import UploadSection from '@/components/orga-note/UploadSection';
 import LinksSection from '@/components/orga-note/LinksSection';
-
 
 import { summarizeNote, type SummarizeNoteInput } from '@/ai/flows/summarize-note';
 import { useToast } from "@/hooks/use-toast";
@@ -36,11 +32,11 @@ export default function OreganotePage() {
     if (typeof window !== 'undefined') {
       const notesFromStorage = getSavedNotes();
       setSavedNotes(notesFromStorage);
-      // Optionally, load the first note or a default state
       if (notesFromStorage.length > 0) {
-        // handleLoadNote(notesFromStorage[0].id); // Example: load first note
+        // Optionally load the first note or a default state
+        // handleLoadNote(notesFromStorage[0].id); 
       } else {
-        setNoteTitle('Untitled Note'); // Default title for a new note
+        setNoteTitle('Untitled Note'); 
       }
     }
   }, []);
@@ -118,7 +114,7 @@ export default function OreganotePage() {
       const newId = Date.now().toString();
       noteToSave = { id: newId, name: noteTitle.trim(), content: noteContent, lastModified: Date.now() };
       setSavedNotes(prev => [noteToSave, ...prev]);
-      setActiveNoteId(newId); // Set the new note as active
+      setActiveNoteId(newId); 
       toast({ title: "Note Saved", description: `"${noteToSave.name}" has been saved.` });
     }
   }, [activeNoteId, noteTitle, noteContent, savedNotes, toast]);
@@ -144,7 +140,6 @@ export default function OreganotePage() {
     const noteToDelete = savedNotes.find(n => n.id === noteId);
     setSavedNotes(prev => prev.filter(n => n.id !== noteId));
     if (activeNoteId === noteId) {
-      // If active note is deleted, clear editor and set a default title
       setActiveNoteId(null);
       setNoteTitle('Untitled Note');
       setNoteContent('');
@@ -156,7 +151,7 @@ export default function OreganotePage() {
 
   const handleNewNote = useCallback(() => {
     setActiveNoteId(null);
-    setNoteTitle('Untitled Note'); // Default title for new notes
+    setNoteTitle('Untitled Note'); 
     setNoteContent('');
     setSummary('');
     setKeyTopics('');
@@ -170,39 +165,42 @@ export default function OreganotePage() {
     }
     setSavedNotes(prev => prev.map(n => n.id === noteId ? {...n, name: newName.trim(), lastModified: Date.now()} : n));
     if(activeNoteId === noteId) {
-      setNoteTitle(newName.trim()); // Update title in MainWindow if active note is renamed
+      setNoteTitle(newName.trim()); 
     }
     toast({ title: "Note Renamed", description: `Note renamed to "${newName.trim()}".` });
   }, [toast, activeNoteId]);
+
+  const handleMakeHtml = () => toast({ title: "Make HTML", description: "Functionality to convert note to HTML coming soon!" });
+  const handleSaveToDrive = () => toast({ title: "Save to Drive", description: "Functionality to save to Google Drive coming soon!" });
+  const handleSendShare = () => toast({ title: "Send & Share", description: "Functionality to send or share note coming soon!" });
+  const handleToggleEditor = () => toast({ title: "Toggle Editor", description: "Editor view toggled (placeholder)." });
+  const handleUploadFile = () => toast({ title: "Upload File", description: "File upload functionality coming soon!" });
+
 
   const activeNoteDisplayName = activeNoteId ? savedNotes.find(n => n.id === activeNoteId)?.name : null;
 
   return (
     <div 
       className="h-screen w-screen grid 
-                 grid-cols-[240px_1fr_300px_180px] 
-                 grid-rows-[minmax(320px,auto)_1fr_auto] 
+                 grid-cols-[200px_1fr_280px] 
+                 grid-rows-[auto_minmax(0,1fr)_auto] 
                  gap-0.5 bg-background text-foreground overflow-hidden"
       style={{ fontFamily: 'Arial, sans-serif' }}
     >
-      {/* Row 1: Top sections */}
-      <div className="col-start-1 row-start-1"><LogoSection onSummarize={handleSummarize} isSummarizing={isSummarizing}/></div>
-      <div className="col-start-2 row-start-1 overflow-hidden"><CalendarSection /></div> {/* Calendar takes full height of this row */}
-      <div className="col-start-3 row-start-1"><NotesSection /></div> {/* ToDo List */}
-      <div className="col-start-4 row-start-1"><UploadSection /></div>
-
-      {/* Row 2: Main content areas */}
-      <div className="col-start-1 row-start-2 min-h-0"> {/* Files List */}
-        <FilesSection
-          savedNotes={savedNotes}
-          onLoadNote={handleLoadNote}
-          onDeleteNote={handleDeleteNote}
-          onNewNote={handleNewNote}
-          onRenameNote={handleRenameNote}
-          activeNoteId={activeNoteId}
+      {/* Column 1: Logo and Calendar */}
+      <div className="col-start-1 row-start-1">
+        <LogoSection 
+          onSummarize={handleSummarize} 
+          isSummarizing={isSummarizing}
+          onMakeHtml={handleMakeHtml}
+          onSaveToDrive={handleSaveToDrive}
+          onSendShare={handleSendShare}
         />
       </div>
-      <div className="col-start-2 row-start-2 min-h-0"> {/* Main Note Editor Window */}
+      <div className="col-start-1 row-start-2 overflow-auto min-h-0"><CalendarSection /></div>
+
+      {/* Column 2: Main Note Editor */}
+      <div className="col-start-2 row-start-1 row-span-2 min-h-0">
         <MainWindow
           noteTitle={noteTitle}
           setNoteTitle={setNoteTitle}
@@ -212,18 +210,27 @@ export default function OreganotePage() {
           keyTopics={keyTopics}
           isSummarizing={isSummarizing}
           onSaveCurrentNote={handleSaveCurrentNote}
+          onNewNote={handleNewNote}
+          onToggleEditor={handleToggleEditor}
           activeNoteName={activeNoteDisplayName}
         />
       </div>
-      <div className="col-start-3 row-start-2 min-h-0"> {/* Project Files Thumbnails */}
-         <ProjectFilesSection savedNotes={savedNotes} onLoadNote={handleLoadNote} />
-      </div>
-      <div className="col-start-4 row-start-2 min-h-0"> {/* Sidebar Right */}
-        <SidebarRight />
-      </div>
       
-      {/* Row 3: Links Section (formerly Footer) */}
-      <div className="col-start-1 col-span-4 row-start-3"><LinksSection /></div>
+      {/* Column 3: Project Files and ToDo List */}
+      <div className="col-start-3 row-start-1 overflow-auto min-h-0">
+         <ProjectFilesSection 
+            savedNotes={savedNotes} 
+            onLoadNote={handleLoadNote}
+            onDeleteNote={handleDeleteNote}
+            onRenameNote={handleRenameNote}
+            activeNoteId={activeNoteId}
+            onUploadFile={handleUploadFile}
+          />
+      </div>
+       <div className="col-start-3 row-start-2 overflow-auto min-h-0"><NotesSection /></div>
+      
+      {/* Bottom Row: Links Section */}
+      <div className="col-start-1 col-span-3 row-start-3"><LinksSection /></div>
     </div>
   );
 }

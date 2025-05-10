@@ -9,29 +9,52 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Settings, Sparkles, FileText, UploadCloud, LogOut, HelpCircle } from 'lucide-react';
+import { Settings, Sparkles, FileText, UploadCloud, LogOut, HelpCircle, FileCode, Save, Send } from 'lucide-react';
 
 interface LogoSectionProps {
   onSummarize: () => void;
   isSummarizing: boolean;
+  onMakeHtml: () => void;
+  onSaveToDrive: () => void;
+  onSendShare: () => void;
 }
 
-const LogoSection: React.FC<LogoSectionProps> = ({ onSummarize, isSummarizing }) => {
+const LogoSection: React.FC<LogoSectionProps> = ({ 
+  onSummarize, 
+  isSummarizing,
+  onMakeHtml,
+  onSaveToDrive,
+  onSendShare 
+}) => {
   return (
-    <div className="bg-background p-2.5 border border-border h-full flex flex-col items-center justify-center">
-      <h1 className="text-3xl font-bold text-primary mb-2">Oreganote</h1>
+    <div className="bg-background p-2.5 border border-border h-auto flex flex-col items-center justify-start">
+      <h1 className="text-2xl font-bold text-primary mb-2">Oreganote</h1>
       
-      <div className="flex flex-col space-y-2 w-full px-2">
+      <div className="flex flex-col space-y-1.5 w-full px-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full justify-start border-border text-foreground hover:bg-accent hover:text-accent-foreground">
-              <Settings className="mr-2 h-4 w-4" /> Settings
+            <Button variant="outline" size="sm" className="w-full justify-start border-border text-foreground hover:bg-accent hover:text-accent-foreground text-xs h-8">
+              <Settings className="mr-2 h-3.5 w-3.5" /> Settings
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56 bg-popover border-border text-popover-foreground">
-            <DropdownMenuLabel>App Settings</DropdownMenuLabel>
+            <DropdownMenuLabel>App Actions</DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-border" />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={onSummarize} disabled={isSummarizing}>
+              <Sparkles className="mr-2 h-4 w-4" />
+              {isSummarizing ? 'Summarizing...' : 'Summarize AI'}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onMakeHtml}>
+              <FileCode className="mr-2 h-4 w-4" /> Make HTML
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onSaveToDrive}>
+              <Save className="mr-2 h-4 w-4" /> Save to Drive
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onSendShare}>
+              <Send className="mr-2 h-4 w-4" /> Send &amp; Share
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-border"/>
+             <DropdownMenuItem>
               <FileText className="mr-2 h-4 w-4" /> My Account (soon)
             </DropdownMenuItem>
             <DropdownMenuItem>
@@ -46,17 +69,6 @@ const LogoSection: React.FC<LogoSectionProps> = ({ onSummarize, isSummarizing })
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        <Button
-          onClick={onSummarize}
-          disabled={isSummarizing}
-          variant="outline"
-          className="w-full justify-start bg-accent text-accent-foreground hover:bg-accent/90 border-border"
-          aria-label="Summarize current note with AI"
-        >
-          <Sparkles className="mr-2 h-4 w-4" />
-          {isSummarizing ? 'Summarizing...' : 'Summarize AI'}
-        </Button>
       </div>
     </div>
   );

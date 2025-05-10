@@ -116,7 +116,7 @@ const LinksSection: React.FC = () => {
   return (
     <div className="bg-background p-2.5 border-t border-border flex flex-col h-48">
       <div className="flex justify-between items-center mb-2">
-        <h3 className="text-lg font-semibold text-foreground">Quick Links</h3>
+        <h3 className="text-lg font-semibold text-primary">Quick Links</h3>
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm" onClick={openDialog} className="bg-accent text-accent-foreground hover:bg-accent/90">
