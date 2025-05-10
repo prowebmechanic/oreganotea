@@ -180,7 +180,7 @@ export default function OreganotePage() {
     <div 
       className="h-screen w-screen grid 
                  grid-cols-[250px_1fr_300px] 
-                 grid-rows-[auto_minmax(0,1fr)_minmax(0,1fr)_auto] 
+                 grid-rows-[auto_1fr_auto_auto] 
                  gap-0.5 bg-background text-foreground overflow-hidden"
       style={{ fontFamily: 'Arial, sans-serif' }}
     >
@@ -194,12 +194,12 @@ export default function OreganotePage() {
           onSendShare={handleSendShare}
         />
       </div>
-      <div className="col-start-1 row-start-2 row-span-2 flex flex-col min-h-0 bg-light-blue"> {/* Calendar, spanning R2 and R3 */}
+      <div className="col-start-1 row-start-2 row-span-2 flex flex-col min-h-0 bg-light-blue"> {/* Calendar, spanning R2 and R3 (auto) */}
         <CalendarSection />
       </div>
       
       {/* Column 2: Main Note Editor Window */}
-      <div className="col-start-2 row-start-1 row-span-3 flex flex-col min-h-0 bg-secondary"> {/* MainWindow, spanning R1, R2, R3 */}
+      <div className="col-start-2 row-start-1 row-span-3 flex flex-col min-h-0 bg-secondary"> {/* MainWindow, spanning R1, R2 (1fr), and R3 (auto) */}
         <MainWindow
           noteTitle={noteTitle}
           setNoteTitle={setNoteTitle}
@@ -214,7 +214,7 @@ export default function OreganotePage() {
       </div>
       
       {/* Column 3: Project Files (top), ToDo (bottom) */}
-      <div className="col-start-3 row-start-1 row-span-2 flex flex-col min-h-0 bg-light-blue"> {/* ProjectFiles, spanning R1 and R2 */}
+      <div className="col-start-3 row-start-1 row-span-2 flex flex-col min-h-0 bg-light-blue"> {/* ProjectFiles, spanning R1 (auto) and R2 (1fr) */}
          <ProjectFilesSection 
             savedNotes={savedNotes} 
             onLoadNote={handleLoadNote}
@@ -224,15 +224,15 @@ export default function OreganotePage() {
             onUploadFile={handleUploadFile}
           />
       </div>
-      <div className="col-start-3 row-start-3 flex flex-col min-h-0 bg-light-blue"> {/* ToDo List (NotesSection), in R3 */}
-        <NotesSection /> {/* This is the ToDo List */}
+      <div className="col-start-3 row-start-3 flex flex-col min-h-0 bg-light-blue"> {/* ToDo List (NotesSection), in R3 (auto height) */}
+        <NotesSection /> 
       </div>
       
-      {/* Bottom Row: Links Section - Spanning C1 and C2, in R4 */}
+      {/* Bottom Row: Links Section - Spanning C1 and C2, in R4 (auto height) */}
       <div className="col-start-1 col-span-2 row-start-4 bg-secondary"> 
         <LinksSection />
       </div>
+      {/* Col 3, Row 4 is implicitly empty */}
     </div>
   );
 }
-
