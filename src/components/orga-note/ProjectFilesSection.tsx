@@ -5,7 +5,7 @@ import type { SavedNote } from '@/types/note';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { Eye, PlusCircle, Trash2 } from 'lucide-react'; // Removed FileText
+import { Eye, PlusCircle, Trash2 } from 'lucide-react'; 
 
 interface ProjectFilesSectionProps {
   savedNotes: SavedNote[];
@@ -46,8 +46,7 @@ const ProjectFilesSection: React.FC<ProjectFilesSectionProps> = ({
               >
                 <CardHeader className="p-2 flex flex-row items-center justify-between">
                   <div onClick={() => onLoadNote(note.id)} className="cursor-pointer flex-grow overflow-hidden mr-1"> 
-                    <CardTitle className="text-base font-semibold text-primary flex items-center"> {/* Changed text-sm to text-base font-semibold */}
-                      {/* FileText icon removed */}
+                    <CardTitle className="text-base font-semibold text-primary flex items-center"> 
                       <span className="flex-1 min-w-0 truncate" title={note.name}> 
                         {note.name}
                       </span>
@@ -77,3 +76,4 @@ const ProjectFilesSection: React.FC<ProjectFilesSectionProps> = ({
 };
 
 export default ProjectFilesSection;
+

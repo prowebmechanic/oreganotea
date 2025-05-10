@@ -180,7 +180,7 @@ export default function OreganotePage() {
     <div 
       className="h-screen w-screen grid 
                  grid-cols-[250px_1fr_300px] 
-                 grid-rows-[auto_minmax(0,2fr)_minmax(0,1fr)_auto]
+                 grid-rows-[auto_minmax(0,1fr)_minmax(0,1fr)_auto] 
                  gap-0.5 bg-background text-foreground overflow-hidden"
       style={{ fontFamily: 'Arial, sans-serif' }}
     >
@@ -219,7 +219,7 @@ export default function OreganotePage() {
             savedNotes={savedNotes} 
             onLoadNote={handleLoadNote}
             onDeleteNote={handleDeleteNote}
-            onRenameNote={handleRenameNote} // Kept for type consistency if needed later
+            onRenameNote={handleRenameNote} 
             activeNoteId={activeNoteId}
             onUploadFile={handleUploadFile}
           />
@@ -235,3 +235,4 @@ export default function OreganotePage() {
     </div>
   );
 }
+
