@@ -23,7 +23,7 @@ const SpiceBottleIcon = () => (
     strokeWidth="1.5" // Slightly thinner stroke
     strokeLinecap="round"
     strokeLinejoin="round"
-    className="text-green-600 mr-0.5" // Specific green color, adjust if needed by theme
+    className="text-green-600" // Specific green color
   >
     <path d="M15 3h-1.5a2.5 2.5 0 0 0-5 0H7.5a1 1 0 0 0-1 1V7h11V4a1 1 0 0 0-1-1Z" />
     <path d="M7.5 7h9v11a2.5 2.5 0 0 1-2.5 2.5h-4A2.5 2.5 0 0 1 7.5 18V7Z" />
@@ -52,9 +52,9 @@ const LogoSection: React.FC<LogoSectionProps> = ({
   return (
     <div className="bg-transparent p-2.5 h-auto flex flex-col items-center justify-start">
       <h1 className="text-2xl font-bold text-primary mb-2 flex items-center">
-        <span style={{ color: 'forestgreen' }} className="mr-0.5">Orega</span>
-        <SpiceBottleIcon /> 
-        note
+        <SpiceBottleIcon />
+        <span style={{ color: 'forestgreen' }} className="ml-1">Oregano</span>
+        <span className="text-primary ml-0.5">t&eacute;</span>
       </h1>
       
       <div className="flex flex-col space-y-1.5 w-full px-1">
