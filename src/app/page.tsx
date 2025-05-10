@@ -180,12 +180,12 @@ export default function OreganotePage() {
     <div 
       className="h-screen w-screen grid 
                  grid-cols-[250px_1fr_300px] 
-                 grid-rows-[auto_1fr_auto] 
+                 grid-rows-[auto_minmax(0,1fr)_minmax(0,1fr)_auto]
                  gap-0.5 bg-background text-foreground overflow-hidden"
       style={{ fontFamily: 'Arial, sans-serif' }}
     >
-      {/* Row 1: Logo, Editor Title part of MainWindow, Calendar */}
-      <div className="col-start-1 row-start-1">
+      {/* Column 1: Logo, Calendar, ToDo List */}
+      <div className="col-start-1 row-start-1"> {/* Logo */}
         <LogoSection 
           onSummarize={handleSummarize} 
           isSummarizing={isSummarizing}
@@ -194,8 +194,15 @@ export default function OreganotePage() {
           onSendShare={handleSendShare}
         />
       </div>
+      <div className="col-start-1 row-start-2 flex flex-col min-h-0"> {/* Calendar */}
+        <CalendarSection />
+      </div>
+      <div className="col-start-1 row-start-3 flex flex-col min-h-0"> {/* ToDo List */}
+        <NotesSection />
+      </div>
       
-      <div className="col-start-2 row-start-1 row-span-2 flex flex-col min-h-0">
+      {/* Column 2: Main Note Editor Window */}
+      <div className="col-start-2 row-start-1 row-span-3 flex flex-col min-h-0"> {/* MainWindow */}
         <MainWindow
           noteTitle={noteTitle}
           setNoteTitle={setNoteTitle}
@@ -209,12 +216,8 @@ export default function OreganotePage() {
         />
       </div>
       
-      <div className="col-start-3 row-start-1 flex flex-col min-h-0">
-        <CalendarSection />
-      </div>
-      
-      {/* Row 2: Project Files, Editor Content part of MainWindow, ToDo List */}
-      <div className="col-start-1 row-start-2 flex flex-col min-h-0">
+      {/* Column 3: Project Files (Full Height) */}
+      <div className="col-start-3 row-start-1 row-span-3 flex flex-col min-h-0"> {/* ProjectFiles */}
          <ProjectFilesSection 
             savedNotes={savedNotes} 
             onLoadNote={handleLoadNote}
@@ -224,12 +227,9 @@ export default function OreganotePage() {
             onUploadFile={handleUploadFile}
           />
       </div>
-       <div className="col-start-3 row-start-2 flex flex-col min-h-0">
-        <NotesSection />
-      </div>
       
-      {/* Row 3: Links Section */}
-      <div className="col-start-1 col-span-3 row-start-3">
+      {/* Bottom Row: Links Section */}
+      <div className="col-start-1 col-span-3 row-start-4"> {/* Links */}
         <LinksSection />
       </div>
     </div>
