@@ -49,11 +49,11 @@ const ProjectFilesSection: React.FC<ProjectFilesSectionProps> = ({
         {savedNotes.length === 0 ? (
           <p className="text-muted-foreground text-center py-4">No saved notes to display here yet.</p>
         ) : (
-          <div className="grid grid-cols-1 gap-2"> {/* Changed to single column for better fit with controls */}
+          <div className="grid grid-cols-2 gap-2"> 
             {savedNotes.sort((a,b) => b.lastModified - a.lastModified).map(note => (
               <Card 
                 key={note.id} 
-                className={`bg-card border hover:shadow-lg transition-shadow ${note.id === activeNoteId ? 'border-primary ring-1 ring-primary' : 'border-border'}`}
+                className={`bg-card border hover:shadow-lg transition-shadow flex flex-col ${note.id === activeNoteId ? 'border-primary ring-1 ring-primary' : 'border-border'}`}
                 data-ai-hint="document paper"
               >
                 <CardHeader className="p-2 flex flex-row items-center justify-between">
@@ -66,7 +66,10 @@ const ProjectFilesSection: React.FC<ProjectFilesSectionProps> = ({
                       Mod: {new Date(note.lastModified).toLocaleDateString()}
                     </CardDescription>
                   </div>
-                  <div className="flex items-center shrink-0 ml-1">
+                  <div className="flex items-center shrink-0 ml-1 space-x-0.5">
+                     <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onLoadNote(note.id);}} className="h-6 w-6 text-muted-foreground hover:text-primary">
+                      <Eye className="h-3 w-3" />
+                    </Button>
                     <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleRename(note.id, note.name);}} className="h-6 w-6 text-muted-foreground hover:text-primary">
                       <Pencil className="h-3 w-3" />
                     </Button>
@@ -75,18 +78,10 @@ const ProjectFilesSection: React.FC<ProjectFilesSectionProps> = ({
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent className="p-2 pt-0" onClick={() => onLoadNote(note.id)}>
-                  <p className="text-xs text-foreground line-clamp-2 h-8 overflow-hidden cursor-pointer">
+                <CardContent className="p-2 pt-0 flex-grow cursor-pointer" onClick={() => onLoadNote(note.id)}>
+                  <p className="text-xs text-foreground line-clamp-3 h-10 overflow-hidden"> 
                     {note.content || "No content preview."}
                   </p>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="mt-1.5 w-full text-xs h-6 border-border text-foreground hover:bg-accent hover:text-accent-foreground"
-                    onClick={(e) => { e.stopPropagation(); onLoadNote(note.id); }}
-                  >
-                    <Eye className="mr-1 h-3 w-3" /> View
-                  </Button>
                 </CardContent>
               </Card>
             ))}

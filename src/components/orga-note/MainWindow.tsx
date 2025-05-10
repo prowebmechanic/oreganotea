@@ -5,7 +5,7 @@ import NoteEditor from './NoteEditor';
 import AiSummaryDisplay from './AiSummaryDisplay';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Save, FilePlus2, Edit } from 'lucide-react'; // Edit for Toggle Editor
+import { Save, FilePlus2 } from 'lucide-react'; 
 import { useToast } from "@/hooks/use-toast";
 
 interface MainWindowProps {
@@ -17,9 +17,7 @@ interface MainWindowProps {
   keyTopics: string;
   isSummarizing: boolean;
   onSaveCurrentNote: () => void; 
-  onNewNote: () => void; // Added
-  onToggleEditor: () => void; // Added
-  activeNoteName?: string | null; 
+  onNewNote: () => void; 
 }
 
 const MainWindow: React.FC<MainWindowProps> = ({
@@ -31,18 +29,14 @@ const MainWindow: React.FC<MainWindowProps> = ({
   keyTopics,
   isSummarizing,
   onSaveCurrentNote,
-  onNewNote, // Added
-  onToggleEditor, // Added
-  activeNoteName,
+  onNewNote,
 }) => {
   const { toast } = useToast();
-
-  const displayTitle = activeNoteName ? `(${activeNoteName})` : '(New Note)';
 
   return (
     <div className="bg-background p-2.5 border border-border h-full flex flex-col text-sm">
       <div className="border border-border my-0.5 p-1.25 text-base font-semibold text-primary flex justify-between items-center">
-        <span>Note Editor {displayTitle}</span>
+        <span>Note Editor</span>
         <div className="flex items-center gap-1.5">
           <Button 
             onClick={onNewNote} 
@@ -60,15 +54,6 @@ const MainWindow: React.FC<MainWindowProps> = ({
             title="Save Note"
           >
             <Save className="mr-1 h-3 w-3" /> Save
-          </Button>
-          <Button 
-            onClick={onToggleEditor} 
-            variant="outline"
-            className="border-border text-foreground hover:bg-accent hover:text-accent-foreground h-7 text-xs px-2"
-            aria-label="Toggle editor view"
-            title="Toggle Editor"
-          >
-            <Edit className="mr-1 h-3 w-3" /> Toggle
           </Button>
         </div>
       </div>

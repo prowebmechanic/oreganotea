@@ -173,11 +173,8 @@ export default function OreganotePage() {
   const handleMakeHtml = () => toast({ title: "Make HTML", description: "Functionality to convert note to HTML coming soon!" });
   const handleSaveToDrive = () => toast({ title: "Save to Drive", description: "Functionality to save to Google Drive coming soon!" });
   const handleSendShare = () => toast({ title: "Send & Share", description: "Functionality to send or share note coming soon!" });
-  const handleToggleEditor = () => toast({ title: "Toggle Editor", description: "Editor view toggled (placeholder)." });
   const handleUploadFile = () => toast({ title: "Upload File", description: "File upload functionality coming soon!" });
 
-
-  const activeNoteDisplayName = activeNoteId ? savedNotes.find(n => n.id === activeNoteId)?.name : null;
 
   return (
     <div 
@@ -211,8 +208,6 @@ export default function OreganotePage() {
           isSummarizing={isSummarizing}
           onSaveCurrentNote={handleSaveCurrentNote}
           onNewNote={handleNewNote}
-          onToggleEditor={handleToggleEditor}
-          activeNoteName={activeNoteDisplayName}
         />
       </div>
       
