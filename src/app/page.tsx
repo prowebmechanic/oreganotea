@@ -14,6 +14,7 @@ import { saveToDrive, type SaveToDriveInput } from '@/ai/flows/save-to-drive';
 import { useToast } from "@/hooks/use-toast";
 import type { SavedNote } from '@/types/note';
 import { getSavedNotes, saveNotes as saveNotesToStorage } from '@/lib/localStorage';
+import { saveAs } from 'file-saver';
 
 export default function OreganotePage() {
   const [noteTitle, setNoteTitle] = useState<string>('');
@@ -171,8 +172,74 @@ export default function OreganotePage() {
     }
     toast({ title: "Note Renamed", description: `Note renamed to "${newName.trim()}".` });
   }, [toast, activeNoteId]);
+  
+  const handleMakeHtml = useCallback(() => {
+    if (!noteTitle.trim() && !noteContent.trim()) {
+      toast({
+        title: "Cannot Create HTML",
+        description: "Note title and content are empty. Add some content first.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const handleMakeHtml = () => toast({ title: "Make HTML", description: "Functionality to convert note to HTML coming soon!" });
+    const htmlTitle = noteTitle.trim() || "Untitled Note";
+    // Basic HTML structure. For more complex styling, you might need to inline CSS or link to an external stylesheet.
+    const htmlBodyContent = noteContent
+      .split('\n')
+      .map(paragraph => `<p>${paragraph.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`) // Basic sanitization and paragraph wrapping
+      .join('\n');
+
+    const htmlFullContent = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${htmlTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</title>
+        <style>
+          body { 
+            font-family: var(--font-geist-sans, Arial, sans-serif); /* Use app font */
+            margin: 20px; 
+            line-height: 1.6;
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+          }
+          h1 { 
+            color: hsl(var(--primary));
+            font-size: 1.8em; /* Match app's h1 roughly */
+            margin-bottom: 1em;
+          }
+          p { 
+            margin-bottom: 0.8em;
+            font-size: 1em; /* Match app's p roughly */
+          }
+          /* You can expand these styles to better match your app's theme */
+        </style>
+      </head>
+      <body>
+        <h1>${htmlTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h1>
+        ${htmlBodyContent}
+      </body>
+      </html>
+    `;
+    const blob = new Blob([htmlFullContent], { type: 'text/html;charset=utf-8' });
+    try {
+      const safeFileName = htmlTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'note';
+      saveAs(blob, `${safeFileName}.html`);
+      toast({
+        title: "HTML File Saved",
+        description: `"${safeFileName}.html" has been downloaded.`,
+      });
+    } catch (error) {
+      console.error("Error saving HTML file:", error);
+      toast({
+        title: "Save HTML Failed",
+        description: "An error occurred while trying to save the HTML file.",
+        variant: "destructive",
+      });
+    }
+  }, [noteTitle, noteContent, toast]);
   
   const handleSaveToDrive = useCallback(async () => {
     if (!noteTitle.trim() && !noteContent.trim()) {
@@ -198,8 +265,8 @@ export default function OreganotePage() {
           variant: "destructive",
           duration: 7000,
         });
-        // For now, we'll proceed to show how the flow would be called if a token was present.
-        // In a real app, you might return here or initiate the OAuth flow.
+        setIsSavingToDrive(false); // Stop loading state
+        return; 
       }
 
       const input: SaveToDriveInput = { 
@@ -245,7 +312,7 @@ export default function OreganotePage() {
                  grid-cols-[250px_1fr_300px] 
                  grid-rows-[auto_1fr_auto_auto] 
                  gap-0.5 bg-background text-foreground overflow-hidden"
-      style={{ fontFamily: 'Arial, sans-serif' }}
+      style={{ fontFamily: 'var(--font-geist-sans), Arial, sans-serif' }}
     >
       {/* Column 1: Logo, Calendar */}
       <div className="col-start-1 row-start-1 bg-secondary"> {/* Logo */}
@@ -254,6 +321,7 @@ export default function OreganotePage() {
           isSummarizing={isSummarizing}
           onMakeHtml={handleMakeHtml}
           onSaveToDrive={isSavingToDrive ? () => {} : handleSaveToDrive} // Disable button while saving
+          isSavingToDrive={isSavingToDrive}
           onSendShare={handleSendShare}
         />
       </div>

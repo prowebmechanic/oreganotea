@@ -15,19 +15,19 @@ import { Settings, Sparkles, FileText, UploadCloud, LogOut, HelpCircle, FileCode
 const SpiceBottleIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
+    width="24" // Increased size for better visibility
+    height="24" // Increased size for better visibility
     viewBox="0 0 24 24"
     fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
+    stroke="currentColor" // Set to currentColor to inherit color
+    strokeWidth="1.5" // Slightly thinner stroke
     strokeLinecap="round"
     strokeLinejoin="round"
-    className="text-green-600 mr-1" 
+    className="text-green-600 mr-0.5" // Specific green color, adjust if needed by theme
   >
-    <path d="M15 3h- ilaç bottle .5a2.5 2.5 0 0 0-5 0H7.5a1 1 0 0 0-1 1V7h11V4a1 1 0 0 0-1-1Z" />
+    <path d="M15 3h-1.5a2.5 2.5 0 0 0-5 0H7.5a1 1 0 0 0-1 1V7h11V4a1 1 0 0 0-1-1Z" />
     <path d="M7.5 7h9v11a2.5 2.5 0 0 1-2.5 2.5h-4A2.5 2.5 0 0 1 7.5 18V7Z" />
-    <path d="M10 11h4" />
+    <path d="M10 11h4" /> {/* Optional: small detail inside bottle */}
   </svg>
 );
 
@@ -37,6 +37,7 @@ interface LogoSectionProps {
   isSummarizing: boolean;
   onMakeHtml: () => void;
   onSaveToDrive: () => void;
+  isSavingToDrive: boolean; // Added this prop
   onSendShare: () => void;
 }
 
@@ -45,13 +46,14 @@ const LogoSection: React.FC<LogoSectionProps> = ({
   isSummarizing,
   onMakeHtml,
   onSaveToDrive,
+  isSavingToDrive, // Consuming the prop
   onSendShare 
 }) => {
   return (
     <div className="bg-transparent p-2.5 h-auto flex flex-col items-center justify-start">
       <h1 className="text-2xl font-bold text-primary mb-2 flex items-center">
         <span style={{ color: 'forestgreen' }} className="mr-0.5">Orega</span>
-        <SpiceBottleIcon />
+        <SpiceBottleIcon /> 
         note
       </h1>
       
@@ -72,8 +74,9 @@ const LogoSection: React.FC<LogoSectionProps> = ({
             <DropdownMenuItem onClick={onMakeHtml}>
               <FileCode className="mr-2 h-4 w-4" /> Make HTML
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={onSaveToDrive}>
-              <Save className="mr-2 h-4 w-4" /> Save to Drive
+            <DropdownMenuItem onClick={onSaveToDrive} disabled={isSavingToDrive}>
+              <Save className="mr-2 h-4 w-4" /> 
+              {isSavingToDrive ? 'Saving...' : 'Save to Drive'}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={onSendShare}>
               <Send className="mr-2 h-4 w-4" /> Send &amp; Share
