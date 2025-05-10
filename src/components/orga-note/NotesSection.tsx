@@ -62,7 +62,7 @@ const NotesSection: React.FC = () => {
 
   if (!isClient) {
     return (
-      <div className="bg-transparent p-2.5 h-full flex flex-col"> {/* Changed bg-background to bg-transparent */}
+      <div className="bg-transparent p-2.5 h-72 flex flex-col"> {/* Changed bg-background to bg-transparent, fixed height */}
         <div className="my-0.5 p-1.25 text-base font-semibold text-primary">ToDo List</div>
         <div className="flex-grow p-1.25 text-muted-foreground">Loading tasks...</div>
       </div>
@@ -70,7 +70,7 @@ const NotesSection: React.FC = () => {
   }
 
   return (
-    <div className="bg-transparent p-2.5 h-full flex flex-col text-sm"> {/* Changed bg-background to bg-transparent */}
+    <div className="bg-transparent p-2.5 h-72 flex flex-col text-sm"> {/* Changed bg-background to bg-transparent, fixed height */}
       <div className="my-0.5 p-1.25 text-base font-semibold text-primary">ToDo List</div>
       <div className="flex gap-1.25 my-1.25 p-1.25 border border-border bg-card"> {/* Added bg-card for this sub-section */}
         <Input
@@ -119,4 +119,3 @@ const NotesSection: React.FC = () => {
 };
 
 export default NotesSection;
-
