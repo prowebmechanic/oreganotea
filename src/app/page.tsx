@@ -8,13 +8,22 @@ import MainWindow from '@/components/orga-note/MainWindow';
 import NotesSection from '@/components/orga-note/NotesSection';
 import ProjectFilesSection from '@/components/orga-note/ProjectFilesSection';
 import LinksSection from '@/components/orga-note/LinksSection';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
 
 import { summarizeNote, type SummarizeNoteInput } from '@/ai/flows/summarize-note';
 import { saveToDrive, type SaveToDriveInput } from '@/ai/flows/save-to-drive';
 import { useToast } from "@/hooks/use-toast";
-import type { SavedNote } from '@/types/note';
-import { getSavedNotes, saveNotes as saveNotesToStorage } from '@/lib/localStorage';
+import type { SavedNote, Task, LinkItem } from '@/types/note';
+import { 
+  getSavedNotes, saveNotes as saveNotesToStorage,
+  getDailyCalendarNotes, saveDailyCalendarNotes,
+  getTasks, saveTasks,
+  getLinks, saveLinks,
+  clearAllOreganoteData
+} from '@/lib/localStorage';
 import { saveAs } from 'file-saver';
+import { formatISO } from 'date-fns';
 
 export default function OreganotePage() {
   const [noteTitle, setNoteTitle] = useState<string>('');
@@ -26,15 +35,26 @@ export default function OreganotePage() {
   
   const [savedNotes, setSavedNotes] = useState<SavedNote[]>([]);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
+  
+  // Lifted states
+  const [dailyNotes, setDailyNotes] = useState<Record<string, string>>({});
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [links, setLinks] = useState<LinkItem[]>([]);
+
   const [isClient, setIsClient] = useState(false);
+  const [showNewProjectDialog, setShowNewProjectDialog] = useState(false);
 
   const { toast } = useToast();
 
   useEffect(() => {
     setIsClient(true);
     if (typeof window !== 'undefined') {
+      setSavedNotes(getSavedNotes());
+      setDailyNotes(getDailyCalendarNotes());
+      setTasks(getTasks());
+      setLinks(getLinks());
+
       const notesFromStorage = getSavedNotes();
-      setSavedNotes(notesFromStorage);
       if (notesFromStorage.length > 0) {
         // Optionally load the first note or a default state
         // handleLoadNote(notesFromStorage[0].id); 
@@ -44,19 +64,16 @@ export default function OreganotePage() {
     }
   }, []);
 
-  useEffect(() => {
-    if (isClient && typeof window !== 'undefined') {
-      saveNotesToStorage(savedNotes);
-    }
-  }, [savedNotes, isClient]);
+  // Effects to save lifted states to localStorage
+  useEffect(() => { if (isClient) saveNotesToStorage(savedNotes); }, [savedNotes, isClient]);
+  useEffect(() => { if (isClient) saveDailyCalendarNotes(dailyNotes); }, [dailyNotes, isClient]);
+  useEffect(() => { if (isClient) saveTasks(tasks); }, [tasks, isClient]);
+  useEffect(() => { if (isClient) saveLinks(links); }, [links, isClient]);
+
 
   const handleSummarize = useCallback(async () => {
     if (!noteContent.trim()) {
-      toast({
-        title: "Empty Note",
-        description: "Cannot summarize an empty note.",
-        variant: "destructive",
-      });
+      toast({ title: "Empty Note", description: "Cannot summarize an empty note.", variant: "destructive" });
       return;
     }
     setIsSummarizing(true);
@@ -67,17 +84,10 @@ export default function OreganotePage() {
       const result = await summarizeNote(input);
       setSummary(result.summary);
       setKeyTopics(result.keyTopics);
-      toast({
-        title: "Summarization Complete",
-        description: "Note has been summarized successfully.",
-      });
+      toast({ title: "Summarization Complete", description: "Note has been summarized successfully." });
     } catch (error) {
       console.error('Error summarizing note:', error);
-      toast({
-        title: "Summarization Failed",
-        description: "An error occurred while summarizing the note.",
-        variant: "destructive",
-      });
+      toast({ title: "Summarization Failed", description: "An error occurred while summarizing the note.", variant: "destructive" });
       setSummary('Error: Could not generate summary.');
       setKeyTopics('Error');
     } finally {
@@ -87,19 +97,11 @@ export default function OreganotePage() {
 
   const handleSaveCurrentNote = useCallback(() => {
     if (!noteTitle.trim()) {
-       toast({
-        title: "Title Required",
-        description: "Note title cannot be blank.",
-        variant: "destructive",
-      });
+       toast({ title: "Title Required", description: "Note title cannot be blank.", variant: "destructive" });
       return;
     }
     if (!noteContent.trim() && !activeNoteId) { 
-      toast({
-        title: "Empty Note",
-        description: "Cannot save an empty new note without content. Add some content first.",
-        variant: "destructive",
-      });
+      toast({ title: "Empty Note", description: "Cannot save an empty new note without content. Add some content first.", variant: "destructive" });
       return;
     }
 
@@ -152,7 +154,7 @@ export default function OreganotePage() {
     toast({ title: "Note Deleted", description: `"${noteToDelete?.name || 'Note'}" has been deleted.` });
   }, [activeNoteId, savedNotes, toast]);
 
-  const handleNewNote = useCallback(() => {
+  const handleNewEditorNote = useCallback(() => { // Renamed from handleNewNote
     setActiveNoteId(null);
     setNoteTitle('Untitled Note'); 
     setNoteContent('');
@@ -175,131 +177,129 @@ export default function OreganotePage() {
   
   const handleMakeHtml = useCallback(() => {
     if (!noteTitle.trim() && !noteContent.trim()) {
-      toast({
-        title: "Cannot Create HTML",
-        description: "Note title and content are empty. Add some content first.",
-        variant: "destructive",
-      });
+      toast({ title: "Cannot Create HTML", description: "Note title and content are empty. Add some content first.", variant: "destructive" });
       return;
     }
-
     const htmlTitle = noteTitle.trim() || "Untitled Note";
-    // Basic HTML structure. For more complex styling, you might need to inline CSS or link to an external stylesheet.
-    const htmlBodyContent = noteContent
-      .split('\n')
-      .map(paragraph => `<p>${paragraph.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`) // Basic sanitization and paragraph wrapping
-      .join('\n');
-
-    const htmlFullContent = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${htmlTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</title>
-        <style>
-          body { 
-            font-family: var(--font-geist-sans, Arial, sans-serif); /* Use app font */
-            margin: 20px; 
-            line-height: 1.6;
-            background-color: hsl(var(--background));
-            color: hsl(var(--foreground));
-          }
-          h1 { 
-            color: hsl(var(--primary));
-            font-size: 1.8em; /* Match app's h1 roughly */
-            margin-bottom: 1em;
-          }
-          p { 
-            margin-bottom: 0.8em;
-            font-size: 1em; /* Match app's p roughly */
-          }
-          /* You can expand these styles to better match your app's theme */
-        </style>
-      </head>
-      <body>
-        <h1>${htmlTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h1>
-        ${htmlBodyContent}
-      </body>
-      </html>
-    `;
+    const htmlBodyContent = noteContent.split('\n').map(p => `<p>${p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`).join('\n');
+    const htmlFullContent = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${htmlTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</title><style>body { font-family: var(--font-geist-sans, Arial, sans-serif); margin: 20px; line-height: 1.6; background-color: hsl(var(--background)); color: hsl(var(--foreground));} h1 { color: hsl(var(--primary)); font-size: 1.8em; margin-bottom: 1em;} p { margin-bottom: 0.8em; font-size: 1em;}</style></head><body><h1>${htmlTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h1>${htmlBodyContent}</body></html>`;
     const blob = new Blob([htmlFullContent], { type: 'text/html;charset=utf-8' });
     try {
       const safeFileName = htmlTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'note';
       saveAs(blob, `${safeFileName}.html`);
-      toast({
-        title: "HTML File Saved",
-        description: `"${safeFileName}.html" has been downloaded.`,
-      });
+      toast({ title: "HTML File Saved", description: `"${safeFileName}.html" has been downloaded.` });
     } catch (error) {
       console.error("Error saving HTML file:", error);
-      toast({
-        title: "Save HTML Failed",
-        description: "An error occurred while trying to save the HTML file.",
-        variant: "destructive",
-      });
+      toast({ title: "Save HTML Failed", description: "An error occurred while trying to save the HTML file.", variant: "destructive" });
     }
   }, [noteTitle, noteContent, toast]);
   
   const handleSaveToDrive = useCallback(async () => {
     if (!noteTitle.trim() && !noteContent.trim()) {
-      toast({
-        title: "Empty Note",
-        description: "Cannot save an empty note to Drive. Add a title or content.",
-        variant: "destructive",
-      });
+      toast({ title: "Empty Note", description: "Cannot save an empty note to Drive. Add a title or content.", variant: "destructive" });
       return;
     }
     setIsSavingToDrive(true);
     try {
-      // IMPORTANT: In a real application, you would obtain the accessToken
-      // through a proper OAuth2 flow with Google.
-      // This is a placeholder and will likely fail without a valid token.
       const placeholderAccessToken = 'YOUR_GOOGLE_OAUTH_ACCESS_TOKEN'; 
-                                    // Replace with a real token for testing or implement OAuth.
-      
       if (placeholderAccessToken === 'YOUR_GOOGLE_OAUTH_ACCESS_TOKEN') {
-         toast({
-          title: "Authentication Required",
-          description: "Google Drive integration requires authentication. Please implement OAuth2 flow.",
-          variant: "destructive",
-          duration: 7000,
-        });
-        setIsSavingToDrive(false); // Stop loading state
+         toast({ title: "Authentication Required", description: "Google Drive integration requires authentication. Please implement OAuth2 flow.", variant: "destructive", duration: 7000 });
+        setIsSavingToDrive(false);
         return; 
       }
-
-      const input: SaveToDriveInput = { 
-        noteTitle: noteTitle || 'Untitled Oreganote', 
-        noteContent,
-        accessToken: placeholderAccessToken 
-      };
-      
+      const input: SaveToDriveInput = { noteTitle: noteTitle || 'Untitled Oreganote', noteContent, accessToken: placeholderAccessToken };
       const result = await saveToDrive(input);
-      
-      toast({
-        title: "Saved to Google Drive",
-        description: `Note "${result.fileName}" saved. File ID: ${result.fileId}. ${result.webViewLink ? `View: ${result.webViewLink}` : ''}`,
-        duration: 7000,
-        action: result.webViewLink ? (
-          <a href={result.webViewLink} target="_blank" rel="noopener noreferrer" className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-background px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-            Open in Drive
-          </a>
-        ) : undefined,
-      });
-
+      toast({ title: "Saved to Google Drive", description: `Note "${result.fileName}" saved. File ID: ${result.fileId}. ${result.webViewLink ? `View: ${result.webViewLink}` : ''}`, duration: 7000, action: result.webViewLink ? (<a href={result.webViewLink} target="_blank" rel="noopener noreferrer" className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-background px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">Open in Drive</a>) : undefined });
     } catch (error: any) {
       console.error('Error saving note to Google Drive:', error);
-      toast({
-        title: "Save to Drive Failed",
-        description: error.message || "An error occurred while saving the note to Google Drive.",
-        variant: "destructive",
-        duration: 7000,
-      });
+      toast({ title: "Save to Drive Failed", description: error.message || "An error occurred while saving the note to Google Drive.", variant: "destructive", duration: 7000 });
     } finally {
       setIsSavingToDrive(false);
     }
   }, [noteTitle, noteContent, toast]);
+
+  // Handlers for lifted state (Daily Notes)
+  const handleSaveDailyNote = useCallback((date: Date, noteText: string) => {
+    const dateISO = formatISO(date, { representation: 'date' });
+    setDailyNotes(prev => ({ ...prev, [dateISO]: noteText }));
+  }, []);
+
+  const handleDeleteDailyNote = useCallback((date: Date) => {
+    const dateISO = formatISO(date, { representation: 'date' });
+    setDailyNotes(prev => {
+      const newNotes = { ...prev };
+      delete newNotes[dateISO];
+      return newNotes;
+    });
+  }, []);
+
+  // Handlers for lifted state (Tasks)
+  const handleAddTask = useCallback((text: string) => {
+    const newTask: Task = { id: Date.now().toString(), text, completed: false };
+    setTasks(prev => [newTask, ...prev]);
+  }, []);
+
+  const handleToggleTask = useCallback((taskId: string) => {
+    setTasks(prev => prev.map(task => task.id === taskId ? { ...task, completed: !task.completed } : task));
+  }, []);
+
+  const handleDeleteTask = useCallback((taskId: string) => {
+    setTasks(prev => prev.filter(task => task.id !== taskId));
+  }, []);
+
+  // Handlers for lifted state (Links)
+  const handleSaveLink = useCallback((name: string, url: string, id?: string) => {
+    if (id) {
+      setLinks(prev => prev.map(link => link.id === id ? { ...link, name, url } : link));
+    } else {
+      const newLink: LinkItem = { id: Date.now().toString(), name, url };
+      setLinks(prev => [newLink, ...prev]);
+    }
+  }, []);
+
+  const handleDeleteLink = useCallback((linkId: string) => {
+    setLinks(prev => prev.filter(link => link.id !== linkId));
+  }, []);
+
+  // Export Project Data
+  const handleExportProjectData = useCallback(() => {
+    const projectData = {
+      version: "1.0.0",
+      createdAt: new Date().toISOString(),
+      savedNotes,
+      dailyCalendarNotes: dailyNotes,
+      tasks,
+      links,
+    };
+    const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json;charset=utf-8' });
+    try {
+      saveAs(blob, 'oreganote-project-data.json');
+      toast({ title: "Project Data Exported", description: "All project data has been saved to 'oreganote-project-data.json'." });
+    } catch (error) {
+      console.error("Error exporting project data:", error);
+      toast({ title: "Export Failed", description: "An error occurred while exporting project data.", variant: "destructive" });
+    }
+  }, [savedNotes, dailyNotes, tasks, links, toast]);
+
+  // New Project
+  const handleNewProjectConfirm = useCallback(() => {
+    // Reset all states
+    setNoteTitle('Untitled Note');
+    setNoteContent('');
+    setSummary('');
+    setKeyTopics('');
+    setActiveNoteId(null);
+    setSavedNotes([]);
+    setDailyNotes({});
+    setTasks([]);
+    setLinks([]);
+
+    // Clear localStorage
+    clearAllOreganoteData();
+    
+    setShowNewProjectDialog(false);
+    toast({ title: "New Project Created", description: "All data has been reset to a blank slate." });
+  }, [toast]);
 
 
   const handleSendShare = () => toast({ title: "Send & Share", description: "Functionality to send or share note coming soon!" });
@@ -315,22 +315,28 @@ export default function OreganotePage() {
       style={{ fontFamily: 'var(--font-geist-sans), Arial, sans-serif' }}
     >
       {/* Column 1: Logo, Calendar */}
-      <div className="col-start-1 row-start-1 bg-secondary"> {/* Logo */}
+      <div className="col-start-1 row-start-1 bg-secondary">
         <LogoSection 
           onSummarize={handleSummarize} 
           isSummarizing={isSummarizing}
           onMakeHtml={handleMakeHtml}
-          onSaveToDrive={isSavingToDrive ? () => {} : handleSaveToDrive} // Disable button while saving
+          onSaveToDrive={isSavingToDrive ? () => {} : handleSaveToDrive}
           isSavingToDrive={isSavingToDrive}
           onSendShare={handleSendShare}
+          onExportProjectData={handleExportProjectData}
+          onNewProject={() => setShowNewProjectDialog(true)}
         />
       </div>
-      <div className="col-start-1 row-start-2 row-span-2 flex flex-col min-h-0 bg-light-blue"> {/* Calendar, spanning R2 and R3 (auto) */}
-        <CalendarSection />
+      <div className="col-start-1 row-start-2 row-span-2 flex flex-col min-h-0 bg-light-blue">
+        <CalendarSection 
+          dailyNotes={dailyNotes}
+          onSaveDailyNote={handleSaveDailyNote}
+          onDeleteDailyNote={handleDeleteDailyNote}
+        />
       </div>
       
       {/* Column 2: Main Note Editor Window */}
-      <div className="col-start-2 row-start-1 row-span-3 flex flex-col min-h-0 bg-secondary"> {/* MainWindow, spanning R1, R2 (1fr), and R3 (auto) */}
+      <div className="col-start-2 row-start-1 row-span-3 flex flex-col min-h-0 bg-secondary">
         <MainWindow
           noteTitle={noteTitle}
           setNoteTitle={setNoteTitle}
@@ -340,12 +346,12 @@ export default function OreganotePage() {
           keyTopics={keyTopics}
           isSummarizing={isSummarizing}
           onSaveCurrentNote={handleSaveCurrentNote}
-          onNewNote={handleNewNote}
+          onNewNote={handleNewEditorNote} 
         />
       </div>
       
       {/* Column 3: Project Files (top), ToDo (bottom) */}
-      <div className="col-start-3 row-start-1 row-span-3 flex flex-col min-h-0 bg-light-blue"> {/* ProjectFiles, spanning R1, R2 (1fr) and R3 (auto) */}
+      <div className="col-start-3 row-start-1 row-span-3 flex flex-col min-h-0 bg-light-blue">
          <ProjectFilesSection 
             savedNotes={savedNotes} 
             onLoadNote={handleLoadNote}
@@ -355,15 +361,42 @@ export default function OreganotePage() {
             onUploadFile={handleUploadFile}
           />
       </div>
-      <div className="col-start-3 row-start-4 flex flex-col min-h-0 bg-light-blue"> {/* ToDo List (NotesSection), in R4 (auto height) */}
-        <NotesSection /> 
+      <div className="col-start-3 row-start-4 flex flex-col min-h-0 bg-light-blue">
+        <NotesSection 
+          tasks={tasks}
+          onAddTask={handleAddTask}
+          onToggleTask={handleToggleTask}
+          onDeleteTask={handleDeleteTask}
+        /> 
       </div>
       
-      {/* Bottom Row: Links Section - Spanning C1 and C2, in R4 (auto height) */}
+      {/* Bottom Row: Links Section - Spanning C1 and C2 */}
       <div className="col-start-1 col-span-2 row-start-4 bg-secondary"> 
-        <LinksSection />
+        <LinksSection 
+          links={links}
+          onSaveLink={handleSaveLink}
+          onDeleteLink={handleDeleteLink}
+        />
       </div>
-      {/* Col 3, Row 4 is where NotesSection is now. */}
+
+      {/* New Project Confirmation Dialog */}
+      <AlertDialog open={showNewProjectDialog} onOpenChange={setShowNewProjectDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Create New Project?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action will erase all current project data (notes, calendar entries, tasks, links) and start a new blank project. 
+              This cannot be undone. Make sure you have saved or exported your current project data if you wish to keep it.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowNewProjectDialog(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleNewProjectConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Yes, Create New Project
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

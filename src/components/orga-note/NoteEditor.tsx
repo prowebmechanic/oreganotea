@@ -1,4 +1,4 @@
-import type React from 'react';
+import React from 'react';
 import { Textarea } from '@/components/ui/textarea';
 
 interface NoteEditorProps {

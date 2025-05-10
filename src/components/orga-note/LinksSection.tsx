@@ -1,7 +1,7 @@
 // src/components/orga-note/LinksSection.tsx
 'use client';
-import type React from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import type { LinkItem } from '@/types/note';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -10,16 +10,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
 
-interface LinkItem {
-  id: string;
-  name: string;
-  url: string;
+interface LinksSectionProps {
+  links: LinkItem[];
+  onSaveLink: (name: string, url: string, id?: string) => void;
+  onDeleteLink: (linkId: string) => void;
 }
 
-const LINKS_STORAGE_KEY = 'oreganoteLinks';
-
-const LinksSection: React.FC = () => {
-  const [links, setLinks] = useState<LinkItem[]>([]);
+const LinksSection: React.FC<LinksSectionProps> = ({ links, onSaveLink, onDeleteLink }) => {
   const [isClient, setIsClient] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingLink, setEditingLink] = useState<LinkItem | null>(null);
@@ -31,24 +28,8 @@ const LinksSection: React.FC = () => {
 
   useEffect(() => {
     setIsClient(true);
-    if (typeof window !== 'undefined') {
-      const storedLinks = localStorage.getItem(LINKS_STORAGE_KEY);
-      if (storedLinks) {
-        try {
-          setLinks(JSON.parse(storedLinks));
-        } catch (e) {
-          console.error("Failed to parse links from localStorage", e);
-          setLinks([]);
-        }
-      }
-    }
   }, []);
 
-  useEffect(() => {
-    if (isClient && typeof window !== 'undefined') {
-      localStorage.setItem(LINKS_STORAGE_KEY, JSON.stringify(links));
-    }
-  }, [links, isClient]);
 
   const resetForm = () => {
     setNewLinkName('');
@@ -56,42 +37,34 @@ const LinksSection: React.FC = () => {
     setEditingLink(null);
   }
 
-  const handleSaveLink = useCallback(() => {
+  const handleInternalSaveLink = useCallback(() => {
     if (!newLinkName.trim() || !newLinkUrl.trim()) {
       toast({ title: "Error", description: "Link name and URL cannot be empty.", variant: "destructive" });
       return;
     }
     try {
-      // Basic URL validation
       new URL(newLinkUrl);
     } catch (_) {
       toast({ title: "Error", description: "Invalid URL format.", variant: "destructive" });
       return;
     }
 
-    if (editingLink) {
-      setLinks(prevLinks => prevLinks.map(link => 
-        link.id === editingLink.id ? { ...link, name: newLinkName.trim(), url: newLinkUrl.trim() } : link
-      ));
-      toast({ title: "Link Updated", description: `"${newLinkName.trim()}" has been updated.` });
-    } else {
-      const newLink: LinkItem = {
-        id: Date.now().toString(),
-        name: newLinkName.trim(),
-        url: newLinkUrl.trim(),
-      };
-      setLinks(prevLinks => [newLink, ...prevLinks]);
-      toast({ title: "Link Added", description: `"${newLink.name}" has been added.` });
-    }
+    onSaveLink(newLinkName.trim(), newLinkUrl.trim(), editingLink?.id);
+    
+    toast({ 
+      title: editingLink ? "Link Updated" : "Link Added", 
+      description: `"${newLinkName.trim()}" has been ${editingLink ? 'updated' : 'added'}.` 
+    });
+    
     resetForm();
     setShowAddDialog(false);
-  }, [newLinkName, newLinkUrl, editingLink, toast]);
+  }, [newLinkName, newLinkUrl, editingLink, onSaveLink, toast]);
 
-  const handleDeleteLink = useCallback((linkId: string) => {
+  const handleInternalDeleteLink = useCallback((linkId: string) => {
     if (!confirm("Are you sure you want to delete this link?")) return;
-    setLinks(prevLinks => prevLinks.filter(link => link.id !== linkId));
+    onDeleteLink(linkId);
     toast({ title: "Link Deleted", description: "The link has been deleted." });
-  }, [toast]);
+  }, [onDeleteLink, toast]);
 
   const handleEditLink = (link: LinkItem) => {
     setEditingLink(link);
@@ -107,16 +80,16 @@ const LinksSection: React.FC = () => {
 
   if (!isClient) {
     return (
-      <div className="bg-transparent p-2.5 flex justify-around items-center h-48"> {/* Changed bg-background to bg-transparent */}
+      <div className="bg-transparent p-2.5 flex justify-around items-center h-48">
         Loading links...
       </div>
     );
   }
 
   return (
-    <div className="bg-transparent p-2.5 flex flex-col h-48"> {/* Changed bg-background to bg-transparent */}
+    <div className="bg-transparent p-2.5 flex flex-col h-48">
       <div className="flex items-center gap-4 mb-1">
-        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+        <Dialog open={showAddDialog} onOpenChange={(isOpen) => {setShowAddDialog(isOpen); if(!isOpen) resetForm();}}>
           <DialogTrigger asChild>
             <Button variant="ghost" size="sm" onClick={openDialog} className="text-accent hover:bg-accent/10">
               <PlusCircle className="mr-2 h-4 w-4" /> Add Link
@@ -138,13 +111,13 @@ const LinksSection: React.FC = () => {
             </div>
             <DialogFooter>
               <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
-              <Button type="button" onClick={handleSaveLink} className="bg-primary text-primary-foreground hover:bg-primary/90">{editingLink ? 'Save Changes' : 'Add Link'}</Button>
+              <Button type="button" onClick={handleInternalSaveLink} className="bg-primary text-primary-foreground hover:bg-primary/90">{editingLink ? 'Save Changes' : 'Add Link'}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
         <h3 className="text-lg font-semibold text-primary">Quick Links</h3>
       </div>
-      <ScrollArea className="flex-grow bg-card p-2 rounded-md border border-border"> {/* Added bg-card and border for ScrollArea */}
+      <ScrollArea className="flex-grow bg-card p-2 rounded-md border border-border">
         {links.length === 0 ? (
           <p className="text-muted-foreground text-center py-4">No links saved yet. Click "Add Link" to get started.</p>
         ) : (
@@ -159,7 +132,7 @@ const LinksSection: React.FC = () => {
                   <Button variant="ghost" size="icon" onClick={() => handleEditLink(link)} className="h-6 w-6 text-muted-foreground hover:text-primary group-hover:opacity-100 md:opacity-0 transition-opacity">
                     <Edit3 className="h-3.5 w-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDeleteLink(link.id)} className="h-6 w-6 text-muted-foreground hover:text-destructive group-hover:opacity-100 md:opacity-0 transition-opacity">
+                  <Button variant="ghost" size="icon" onClick={() => handleInternalDeleteLink(link.id)} className="h-6 w-6 text-muted-foreground hover:text-destructive group-hover:opacity-100 md:opacity-0 transition-opacity">
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -173,4 +146,3 @@ const LinksSection: React.FC = () => {
 };
 
 export default LinksSection;
-

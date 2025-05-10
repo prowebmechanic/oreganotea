@@ -1,43 +1,39 @@
 // src/components/orga-note/CalendarSection.tsx
 'use client';
-import type React from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Calendar } from "@/components/ui/calendar";
 import type { DayContentProps } from "react-day-picker";
 import { formatISO, isToday } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from "@/hooks/use-toast";
-import { getDailyCalendarNotes, saveDailyCalendarNotes } from '@/lib/localStorage';
 import { ScrollArea } from '../ui/scroll-area';
 
+interface CalendarSectionProps {
+  dailyNotes: Record<string, string>;
+  onSaveDailyNote: (date: Date, noteText: string) => void;
+  onDeleteDailyNote: (date: Date) => void;
+}
 
-const CalendarSection: React.FC = () => {
+const CalendarSection: React.FC<CalendarSectionProps> = ({ dailyNotes, onSaveDailyNote, onDeleteDailyNote }) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date()); 
   const [clientMounted, setClientMounted] = useState(false);
-  const [currentMonthView, setCurrentMonthView] = useState<Date>(new Date(new Date().getFullYear(), 4, 1));
-  const [dailyNotes, setDailyNotes] = useState<Record<string, string>>({});
+  const [currentMonthView, setCurrentMonthView] = useState<Date>(new Date()); // Simplified to current month
   const [selectedDayNoteText, setSelectedDayNoteText] = useState('');
 
   const { toast } = useToast();
 
   useEffect(() => {
     setClientMounted(true);
-    if (typeof window !== 'undefined') {
-      const loadedNotes = getDailyCalendarNotes();
-      setDailyNotes(loadedNotes);
-      if (selectedDate) {
-        const dateISO = formatISO(selectedDate, { representation: 'date' });
-        setSelectedDayNoteText(loadedNotes[dateISO] || '');
-      }
-    }
-  }, [selectedDate]); 
+  }, []);
 
   useEffect(() => {
-    if (clientMounted && typeof window !== 'undefined') {
-      saveDailyCalendarNotes(dailyNotes);
+    if (selectedDate) {
+      const dateISO = formatISO(selectedDate, { representation: 'date' });
+      setSelectedDayNoteText(dailyNotes[dateISO] || '');
     }
-  }, [dailyNotes, clientMounted]);
+  }, [selectedDate, dailyNotes]);
+
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
@@ -53,17 +49,16 @@ const CalendarSection: React.FC = () => {
     setCurrentMonthView(month);
   };
 
-  const handleSaveDailyNote = useCallback(() => {
+  const handleInternalSaveDailyNote = useCallback(() => {
     if (!selectedDate) {
       toast({ title: "No Date Selected", description: "Please select a date to save a note.", variant: "destructive" });
       return;
     }
-    const dateISO = formatISO(selectedDate, { representation: 'date' });
-    setDailyNotes(prev => ({ ...prev, [dateISO]: selectedDayNoteText }));
+    onSaveDailyNote(selectedDate, selectedDayNoteText);
     toast({ title: "Note Saved", description: `Note for ${selectedDate.toLocaleDateString()} saved.` });
-  }, [selectedDate, selectedDayNoteText, toast]);
+  }, [selectedDate, selectedDayNoteText, onSaveDailyNote, toast]);
 
-  const handleDeleteDailyNote = useCallback(() => {
+  const handleInternalDeleteDailyNote = useCallback(() => {
     if (!selectedDate) {
       toast({ title: "No Date Selected", description: "Please select a date to delete its note.", variant: "destructive" });
       return;
@@ -73,14 +68,10 @@ const CalendarSection: React.FC = () => {
       toast({ title: "No Note", description: `No note to delete for ${selectedDate.toLocaleDateString()}.`});
       return;
     }
-    
-    const updatedNotes = { ...dailyNotes };
-    delete updatedNotes[dateISO];
-    setDailyNotes(updatedNotes);
-
-    setSelectedDayNoteText('');
+    onDeleteDailyNote(selectedDate);
+    setSelectedDayNoteText(''); // Clear text area after deletion
     toast({ title: "Note Deleted", description: `Note for ${selectedDate.toLocaleDateString()} deleted.` });
-  }, [selectedDate, dailyNotes, toast]);
+  }, [selectedDate, dailyNotes, onDeleteDailyNote, toast]);
 
 
   const DayContentWithNotes = (props: DayContentProps) => {
@@ -110,7 +101,7 @@ const CalendarSection: React.FC = () => {
 
 
   return (
-    <div className="bg-transparent p-1 h-full flex flex-col text-sm"> {/* Changed bg-background to bg-transparent */}
+    <div className="bg-transparent p-1 h-full flex flex-col text-sm">
       {clientMounted ? (
         <>
           <style>{`
@@ -130,10 +121,10 @@ const CalendarSection: React.FC = () => {
             mode="single"
             selected={selectedDate}
             onSelect={handleDateSelect}
-            className="rounded-md bg-card text-foreground p-0 w-full" // bg-card for calendar itself
+            className="rounded-md bg-card text-foreground p-0 w-full" 
             classNames={{
               months: "flex flex-col space-y-2 justify-around items-center", 
-              month: "space-y-1 p-1 border border-border rounded-md w-full max-w-xs bg-card", // bg-card for month
+              month: "space-y-1 p-1 border border-border rounded-md w-full max-w-xs bg-card", 
               caption: "flex justify-center pt-1 relative items-center text-primary",
               caption_label: "text-xs font-medium",
               day: "h-6 w-6 text-xs p-0 font-normal text-foreground hover:bg-accent/80 hover:text-accent-foreground relative", 
@@ -156,7 +147,7 @@ const CalendarSection: React.FC = () => {
             modifiers={modifiers}
             modifiersClassNames={modifiersClassNames}
           />
-          <ScrollArea className="mt-2 p-2 border border-border rounded-md flex-grow min-h-[100px] bg-card"> {/* bg-card for scroll area */}
+          <ScrollArea className="mt-2 p-2 border border-border rounded-md flex-grow min-h-[100px] bg-card">
             <div className="space-y-2">
               <h4 className="text-xs font-semibold text-primary">
                 {selectedDate ? `Note for: ${selectedDate.toLocaleDateString()}` : 'Select a date to add a note'}
@@ -174,9 +165,9 @@ const CalendarSection: React.FC = () => {
                     aria-label="Daily note text area"
                   />
                   <div className="flex gap-2">
-                    <Button onClick={handleSaveDailyNote} size="sm" className="text-xs h-7 px-2 bg-primary hover:bg-primary/90 text-primary-foreground">Save Note</Button>
+                    <Button onClick={handleInternalSaveDailyNote} size="sm" className="text-xs h-7 px-2 bg-primary hover:bg-primary/90 text-primary-foreground">Save Note</Button>
                     {dailyNotes[formatISO(selectedDate, { representation: 'date' })] && (
-                      <Button onClick={handleDeleteDailyNote} variant="destructive" size="sm" className="text-xs h-7 px-2">Delete Note</Button>
+                      <Button onClick={handleInternalDeleteDailyNote} variant="destructive" size="sm" className="text-xs h-7 px-2">Delete Note</Button>
                     )}
                   </div>
                 </>
@@ -195,4 +186,3 @@ const CalendarSection: React.FC = () => {
 };
 
 export default CalendarSection;
-

@@ -1,6 +1,6 @@
 // src/components/orga-note/ProjectFilesSection.tsx
 'use client';
-import type React from 'react';
+import React from 'react';
 import type { SavedNote } from '@/types/note';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'; 
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -42,7 +42,7 @@ const ProjectFilesSection: React.FC<ProjectFilesSectionProps> = ({
               <Card 
                 key={note.id} 
                 className={`bg-card border hover:shadow-lg transition-shadow flex flex-col ${note.id === activeNoteId ? 'border-primary ring-1 ring-primary' : 'border-border'}`}
-                data-ai-hint="document paper"
+                
               >
                 <CardHeader className="p-2 cursor-pointer" onClick={() => onLoadNote(note.id)}>
                   <CardTitle className="text-base font-semibold text-primary"> 
