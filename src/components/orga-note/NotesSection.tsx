@@ -62,30 +62,30 @@ const NotesSection: React.FC = () => {
 
   if (!isClient) {
     return (
-      <div className="bg-background p-2.5 border-x border-b border-border h-full flex flex-col">
-        <div className="my-0.5 p-1.25 text-base font-semibold text-primary">ToDo List</div> {/* Removed border */}
+      <div className="bg-background p-2.5 h-full flex flex-col">
+        <div className="my-0.5 p-1.25 text-base font-semibold text-primary">ToDo List</div>
         <div className="flex-grow p-1.25 text-muted-foreground">Loading tasks...</div>
       </div>
     );
   }
 
   return (
-    <div className="bg-background p-2.5 border-x border-b border-border h-full flex flex-col text-sm">
-      <div className="my-0.5 p-1.25 text-base font-semibold text-primary">ToDo List</div> {/* Removed border */}
-      <div className="flex gap-1.25 my-1.25 p-1.25 border border-border"> {/* Input area border remains */}
+    <div className="bg-background p-2.5 h-full flex flex-col text-sm">
+      <div className="my-0.5 p-1.25 text-base font-semibold text-primary">ToDo List</div>
+      <div className="flex gap-1.25 my-1.25 p-1.25 border border-border"> 
         <Input
           type="text"
           placeholder="Add a new task..."
           value={newTaskText}
           onChange={(e) => setNewTaskText(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && handleAddTask()}
-          className="bg-input text-foreground border-border h-8 text-xs focus:ring-ring focus:border-ring"
+          className="bg-input text-foreground h-8 text-xs focus:ring-ring focus:border-ring"
         />
-        <Button onClick={handleAddTask} variant="outline" size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 h-8 text-xs px-2 border-border">
+        <Button onClick={handleAddTask} variant="outline" size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 h-8 text-xs px-2">
           <PlusCircle className="h-3 w-3 mr-1" /> Add
         </Button>
       </div>
-      <ScrollArea className="my-0.5 p-1.25 flex-grow"> {/* Removed border, ScrollArea handles its look */}
+      <ScrollArea className="my-0.5 p-1.25 flex-grow">
         {tasks.length === 0 ? (
           <p className="text-muted-foreground text-center py-4 text-xs">No tasks yet. Add one above!</p>
         ) : (
@@ -97,7 +97,7 @@ const NotesSection: React.FC = () => {
                     id={`task-${task.id}`}
                     checked={task.completed}
                     onCheckedChange={() => handleToggleTask(task.id)}
-                    className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground"
+                    className="data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground"
                   />
                   <label
                     htmlFor={`task-${task.id}`}

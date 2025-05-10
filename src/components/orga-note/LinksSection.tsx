@@ -107,19 +107,19 @@ const LinksSection: React.FC = () => {
 
   if (!isClient) {
     return (
-      <div className="bg-background p-2.5 border-t border-border flex justify-around items-center h-20">
+      <div className="bg-background p-2.5 flex justify-around items-center h-48">
         Loading links...
       </div>
     );
   }
 
   return (
-    <div className="bg-background p-2.5 border-t border-border flex flex-col h-48">
+    <div className="bg-background p-2.5 flex flex-col h-48">
       <div className="flex justify-between items-center mb-1">
         <h3 className="text-lg font-semibold text-primary">Quick Links</h3>
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
           <DialogTrigger asChild>
-            <Button variant="ghost" size="sm" onClick={openDialog} className="text-accent hover:bg-accent/10"> {/* Changed to ghost */}
+            <Button variant="ghost" size="sm" onClick={openDialog} className="text-accent hover:bg-accent/10">
               <PlusCircle className="mr-2 h-4 w-4" /> Add Link
             </Button>
           </DialogTrigger>
@@ -130,11 +130,11 @@ const LinksSection: React.FC = () => {
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="link-name" className="text-right">Name</Label>
-                <Input id="link-name" value={newLinkName} onChange={(e) => setNewLinkName(e.target.value)} className="col-span-3 bg-input border-border text-foreground" />
+                <Input id="link-name" value={newLinkName} onChange={(e) => setNewLinkName(e.target.value)} className="col-span-3 bg-input text-foreground" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="link-url" className="text-right">URL</Label>
-                <Input id="link-url" type="url" placeholder="https://example.com" value={newLinkUrl} onChange={(e) => setNewLinkUrl(e.target.value)} className="col-span-3 bg-input border-border text-foreground" />
+                <Input id="link-url" type="url" placeholder="https://example.com" value={newLinkUrl} onChange={(e) => setNewLinkUrl(e.target.value)} className="col-span-3 bg-input text-foreground" />
               </div>
             </div>
             <DialogFooter>
@@ -148,11 +148,11 @@ const LinksSection: React.FC = () => {
         {links.length === 0 ? (
           <p className="text-muted-foreground text-center py-4">No links saved yet. Click "Add Link" to get started.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1"> {/* Reduced gap */}
+          <div className="grid grid-cols-2 gap-1"> {/* Changed to 2 columns */}
             {links.map(link => (
-              <div key={link.id} className="p-1 rounded-md bg-transparent flex items-center justify-between hover:bg-secondary/30 transition-colors group"> {/* Removed border, reduced padding, changed bg */}
-                <a href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-primary hover:underline truncate flex-grow py-1"> {/* Reduced gap */}
-                  <LinkIcon className="h-3.5 w-3.5 shrink-0" /> {/* Slightly smaller icon */}
+              <div key={link.id} className="p-1 rounded-md bg-transparent flex items-center justify-between hover:bg-secondary/30 transition-colors group">
+                <a href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-primary hover:underline truncate flex-grow py-1">
+                  <LinkIcon className="h-3.5 w-3.5 shrink-0" />
                   <span className="truncate text-sm" title={link.name}>{link.name}</span>
                 </a>
                 <div className='flex shrink-0'>

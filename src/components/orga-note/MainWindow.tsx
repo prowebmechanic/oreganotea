@@ -32,14 +32,14 @@ const MainWindow: React.FC<MainWindowProps> = ({
 }) => {
 
   return (
-    <div className="bg-background p-2.5 border-x border-b border-border h-full flex flex-col text-sm">
+    <div className="bg-background p-2.5 h-full flex flex-col text-sm">
       <div className="my-0.5 p-1.25 text-base font-semibold text-primary flex justify-between items-center">
         <span>Note Editor</span>
         <div className="flex items-center gap-1.5">
           <Button 
             onClick={onNewNote} 
             variant="outline"
-            className="border-border text-foreground hover:bg-accent hover:text-accent-foreground h-7 text-xs px-2"
+            className="text-foreground hover:bg-accent hover:text-accent-foreground h-7 text-xs px-2"
             aria-label="New note"
             title="New Note"
           >
@@ -55,17 +55,17 @@ const MainWindow: React.FC<MainWindowProps> = ({
           </Button>
         </div>
       </div>
-      <div className="my-0.5 p-1.25"> {/* Removed border here */}
+      <div className="my-0.5 p-1.25">
         <Input 
           type="text"
           placeholder="Enter note title here..."
           value={noteTitle}
           onChange={(e) => setNoteTitle(e.target.value)}
-          className="w-full bg-input border-border text-foreground text-sm h-8"
+          className="w-full bg-input text-foreground text-sm h-8"
           aria-label="Note title"
         />
       </div>
-      <div className="my-0.5 p-1.25 flex-grow flex flex-col min-h-0"> {/* Removed border here */}
+      <div className="my-0.5 p-1.25 flex-grow flex flex-col min-h-0">
         <NoteEditor noteContent={noteContent} setNoteContent={setNoteContent} />
         <div className="mt-2 overflow-y-auto"> {/* This div will scroll if AiSummaryDisplay overflows */}
           <AiSummaryDisplay summary={summary} keyTopics={keyTopics} isLoading={isSummarizing} />

@@ -158,8 +158,6 @@ export default function OreganotePage() {
     toast({ title: "New Note Ready", description: "Editor cleared for a new note." });
   }, [toast]);
 
-  // Rename functionality is being removed from UI, so this handler is currently not called.
-  // Kept for potential future use or if a different UI trigger for renaming is added.
   const handleRenameNote = useCallback((noteId: string, newName: string) => {
     if(!newName.trim()){
       toast({ title: "Rename Cancelled", description: "Note name cannot be empty.", variant: "destructive" });
@@ -181,13 +179,13 @@ export default function OreganotePage() {
   return (
     <div 
       className="h-screen w-screen grid 
-                 grid-cols-[200px_1fr_280px] 
-                 grid-rows-[auto_minmax(0,1fr)_auto] 
+                 grid-cols-[250px_1fr_300px] 
+                 grid-rows-[auto_1fr_auto] 
                  gap-0.5 bg-background text-foreground overflow-hidden"
       style={{ fontFamily: 'Arial, sans-serif' }}
     >
-      {/* Column 1: Logo and Calendar */}
-      <div className="col-start-1 row-start-1 border-r border-border">
+      {/* Row 1: Logo, Editor Title part of MainWindow, Calendar */}
+      <div className="col-start-1 row-start-1">
         <LogoSection 
           onSummarize={handleSummarize} 
           isSummarizing={isSummarizing}
@@ -196,12 +194,8 @@ export default function OreganotePage() {
           onSendShare={handleSendShare}
         />
       </div>
-      <div className="col-start-1 row-start-2 overflow-auto min-h-0 border-r border-border">
-        <CalendarSection />
-      </div>
-
-      {/* Column 2: Main Note Editor */}
-      <div className="col-start-2 row-start-1 row-span-2 min-h-0 border-r border-border">
+      
+      <div className="col-start-2 row-start-1 row-span-2 flex flex-col min-h-0">
         <MainWindow
           noteTitle={noteTitle}
           setNoteTitle={setNoteTitle}
@@ -215,23 +209,27 @@ export default function OreganotePage() {
         />
       </div>
       
-      {/* Column 3: Project Files and ToDo List */}
-      <div className="col-start-3 row-start-1 overflow-auto min-h-0">
+      <div className="col-start-3 row-start-1 flex flex-col min-h-0">
+        <CalendarSection />
+      </div>
+      
+      {/* Row 2: Project Files, Editor Content part of MainWindow, ToDo List */}
+      <div className="col-start-1 row-start-2 flex flex-col min-h-0">
          <ProjectFilesSection 
             savedNotes={savedNotes} 
             onLoadNote={handleLoadNote}
             onDeleteNote={handleDeleteNote}
-            onRenameNote={handleRenameNote} // Prop remains, but UI trigger is removed
+            onRenameNote={handleRenameNote}
             activeNoteId={activeNoteId}
             onUploadFile={handleUploadFile}
           />
       </div>
-       <div className="col-start-3 row-start-2 overflow-auto min-h-0">
+       <div className="col-start-3 row-start-2 flex flex-col min-h-0">
         <NotesSection />
       </div>
       
-      {/* Bottom Row: Links Section */}
-      <div className="col-start-1 col-span-3 row-start-3 border-t border-border">
+      {/* Row 3: Links Section */}
+      <div className="col-start-1 col-span-3 row-start-3">
         <LinksSection />
       </div>
     </div>

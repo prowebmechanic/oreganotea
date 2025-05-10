@@ -28,14 +28,14 @@ const ProjectFilesSection: React.FC<ProjectFilesSectionProps> = ({
   const { toast } = useToast();
   
   return (
-    <div className="bg-background p-2.5 border-x border-b border-border h-full flex flex-col text-sm">
-      <div className="my-0.5 p-1.25 flex justify-between items-center"> {/* Removed border here */}
+    <div className="bg-background p-2.5 h-full flex flex-col text-sm">
+      <div className="my-0.5 p-1.25 flex justify-between items-center">
         <span className="text-lg font-semibold text-primary">Project Files</span>
-        <Button onClick={onUploadFile} variant="outline" size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 h-7 text-xs px-2 border-border">
+        <Button onClick={onUploadFile} variant="outline" size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90 h-7 text-xs px-2">
           <PlusCircle className="h-3 w-3 mr-1" /> Upload
         </Button>
       </div>
-      <ScrollArea className="my-0.5 p-1.25 flex-grow"> {/* Removed border here, ScrollArea handles its own look */}
+      <ScrollArea className="my-0.5 p-1.25 flex-grow">
         {savedNotes.length === 0 ? (
           <p className="text-muted-foreground text-center py-4">No saved notes to display here yet.</p>
         ) : (

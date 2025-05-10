@@ -32,7 +32,7 @@ body {
     --destructive: 0 84.2% 60.2%; /* red */
     --destructive-foreground: 0 0% 98%; /* white/light text on red */
 
-    --border: 0 0% 0%; /* black */
+    --border: 0 0% 87%; /* Lighter grey for general borders (was black) */
     --input: 0 0% 98%; /* very light grey for input background, border will be --border */
     --ring: 30 100% 50%; /* orange for focus rings */
 
@@ -50,7 +50,7 @@ body {
     --sidebar-primary-foreground: 0 0% 100%; /* white */
     --sidebar-accent: 30 100% 50%; /* orange */
     --sidebar-accent-foreground: 0 0% 100%; /* white */
-    --sidebar-border: 0 0% 87%; /* lighter grey for sidebar internal borders, as black might be too harsh */
+    --sidebar-border: 0 0% 87%; /* lighter grey for sidebar internal borders */
     --sidebar-ring: 30 100% 50%; /* orange */
   }
 
@@ -80,7 +80,7 @@ body {
     --destructive: 0 70% 50%; 
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 14.9%; 
+    --border: 0 0% 25%; /* Darker grey for borders in dark mode */
     --input: 240 4% 10%; 
     --ring: 30 90% 55%; 
 
@@ -102,15 +102,13 @@ body {
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+  /* Removed: * { @apply border-border; } */
   body {
     @apply bg-background text-foreground;
   }
-  /* Ensure inputs use theme variables correctly */
+  /* Ensure inputs use theme variables correctly and have a border */
   input, textarea, select {
-    @apply bg-input text-foreground border-border;
+    @apply bg-input text-foreground border border-border;
   }
   button {
     @apply ring-ring; /* Ensure focus rings use the theme's ring color */

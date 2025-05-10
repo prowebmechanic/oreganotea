@@ -27,19 +27,19 @@ const LogoSection: React.FC<LogoSectionProps> = ({
   onSendShare 
 }) => {
   return (
-    <div className="bg-background p-2.5 border border-border h-auto flex flex-col items-center justify-start">
+    <div className="bg-background p-2.5 h-auto flex flex-col items-center justify-start">
       <h1 className="text-2xl font-bold text-primary mb-2">Oreganote</h1>
       
       <div className="flex flex-col space-y-1.5 w-full px-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="w-full justify-start border-border text-foreground hover:bg-accent hover:text-accent-foreground text-xs h-8">
+            <Button variant="outline" size="sm" className="w-full justify-start text-foreground hover:bg-accent hover:text-accent-foreground text-xs h-8">
               <Settings className="mr-2 h-3.5 w-3.5" /> Settings
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 bg-popover border-border text-popover-foreground">
+          <DropdownMenuContent className="w-56 bg-popover text-popover-foreground">
             <DropdownMenuLabel>App Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-border" />
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onSummarize} disabled={isSummarizing}>
               <Sparkles className="mr-2 h-4 w-4" />
               {isSummarizing ? 'Summarizing...' : 'Summarize AI'}
@@ -53,14 +53,14 @@ const LogoSection: React.FC<LogoSectionProps> = ({
             <DropdownMenuItem onClick={onSendShare}>
               <Send className="mr-2 h-4 w-4" /> Send &amp; Share
             </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-border"/>
+            <DropdownMenuSeparator />
              <DropdownMenuItem>
               <FileText className="mr-2 h-4 w-4" /> My Account (soon)
             </DropdownMenuItem>
             <DropdownMenuItem>
               <UploadCloud className="mr-2 h-4 w-4" /> Import/Export (soon)
             </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-border"/>
+            <DropdownMenuSeparator />
             <DropdownMenuItem>
               <HelpCircle className="mr-2 h-4 w-4" /> Help (soon)
             </DropdownMenuItem>

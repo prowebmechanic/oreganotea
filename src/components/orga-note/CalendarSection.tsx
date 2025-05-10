@@ -112,7 +112,7 @@ const CalendarSection: React.FC = () => {
 
 
   return (
-    <div className="bg-background p-1 border-x border-b border-border h-full flex flex-col text-sm">
+    <div className="bg-background p-1 h-full flex flex-col text-sm">
       {clientMounted ? (
         <>
           <style>{`
@@ -172,7 +172,7 @@ const CalendarSection: React.FC = () => {
                     placeholder="Add a note for this day..."
                     value={selectedDayNoteText}
                     onChange={(e) => setSelectedDayNoteText(e.target.value)}
-                    className="bg-input text-foreground border-border text-xs h-16"
+                    className="bg-input text-foreground text-xs h-16"
                     aria-label="Daily note text area"
                   />
                   <div className="flex gap-2">
