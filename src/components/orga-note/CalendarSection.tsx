@@ -149,31 +149,36 @@ const CalendarSection: React.FC<CalendarSectionProps> = ({ dailyNotes, onSaveDai
           />
           <ScrollArea className="mt-2 p-2 border border-border rounded-md flex-grow min-h-[96px] bg-card">
             <div className="space-y-2">
-              <h4 className="text-xs font-semibold text-primary">
-                {selectedDate ? `Note for: ${selectedDate.toLocaleDateString()}` : 'Click a date to add a note'}
-                {selectedDate && isToday(selectedDate) && dailyNotes[formatISO(selectedDate, { representation: 'date' })] && (
-                   <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-destructive text-destructive-foreground">Reminder!</span>
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-semibold text-primary flex-grow">
+                  {selectedDate ? `Note for: ${selectedDate.toLocaleDateString()}` : 'Click a date to add a note'}
+                  {selectedDate && isToday(selectedDate) && dailyNotes[formatISO(selectedDate, { representation: 'date' })] && (
+                     <span className="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-destructive text-destructive-foreground">Reminder!</span>
+                  )}
+                </h4>
+                {selectedDate && (
+                  <Button onClick={handleInternalSaveDailyNote} size="sm" className="text-xs h-7 px-2 bg-primary hover:bg-primary/90 text-primary-foreground ml-2">Save Note</Button>
                 )}
-              </h4>
+              </div>
+
               {selectedDate && (
                 <>
                   <Textarea
                     placeholder="Add a note for this day..."
                     value={selectedDayNoteText}
                     onChange={(e) => setSelectedDayNoteText(e.target.value)}
-                    className="bg-input text-foreground text-xs h-8" // Adjusted height from h-9 to h-8
+                    className="bg-input text-foreground text-xs h-8 mt-1" // Adjusted height from h-9 to h-8 and added mt-1
                     aria-label="Daily note text area"
                   />
-                  <div className="flex gap-2 mt-1">
-                    <Button onClick={handleInternalSaveDailyNote} size="sm" className="text-xs h-7 px-2 bg-primary hover:bg-primary/90 text-primary-foreground">Save Note</Button>
-                    {dailyNotes[formatISO(selectedDate, { representation: 'date' })] && (
-                      <Button onClick={handleInternalDeleteDailyNote} variant="destructive" size="sm" className="text-xs h-7 px-2">Delete Note</Button>
-                    )}
-                  </div>
+                  {dailyNotes[formatISO(selectedDate, { representation: 'date' })] && (
+                     <div className="flex justify-end mt-1">
+                        <Button onClick={handleInternalDeleteDailyNote} variant="destructive" size="sm" className="text-xs h-7 px-2">Delete Note</Button>
+                    </div>
+                  )}
                 </>
               )}
               {!selectedDate && (
-                <p className="text-xs text-muted-foreground">Click on a day in the calendar to manage its notes.</p>
+                <p className="text-xs text-muted-foreground mt-1">Click on a day in the calendar to manage its notes.</p>
               )}
             </div>
           </ScrollArea>

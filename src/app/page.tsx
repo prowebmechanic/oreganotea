@@ -403,18 +403,43 @@ export default function OreganotePage() {
           const fileContent = await file.text();
           const importedData = JSON.parse(fileContent);
 
-          if (importedData.appName !== "Oreganotéa" || !importedData.savedNotes || !importedData.dailyCalendarNotes || !importedData.tasks || !importedData.links) {
-            throw new Error("Invalid project data file format.");
+          if (importedData.appName !== "Oreganotéa" || 
+              importedData.savedNotes === undefined || 
+              importedData.dailyCalendarNotes === undefined || 
+              importedData.tasks === undefined || 
+              importedData.links === undefined) {
+            throw new Error("Invalid project data file format or missing key sections.");
           }
           
           if (!confirm("Importing this file will overwrite current project data. Are you sure?")) {
             return;
           }
 
-          setSavedNotes(importedData.savedNotes || []);
-          setDailyNotes(importedData.dailyCalendarNotes || {});
-          setTasks(importedData.tasks || []);
-          setLinks(importedData.links || []);
+          const validSavedNotes: SavedNote[] = Array.isArray(importedData.savedNotes) 
+            ? importedData.savedNotes.filter((n: any): n is SavedNote => 
+                n && typeof n.id === 'string' && typeof n.name === 'string' && 
+                typeof n.content === 'string' && typeof n.lastModified === 'number') 
+            : [];
+          
+          const validDailyNotes: Record<string, string> = typeof importedData.dailyCalendarNotes === 'object' && importedData.dailyCalendarNotes !== null 
+            ? importedData.dailyCalendarNotes 
+            : {};
+          
+          const validTasks: Task[] = Array.isArray(importedData.tasks) 
+            ? importedData.tasks.filter((t: any): t is Task => 
+                t && typeof t.id === 'string' && typeof t.text === 'string' && typeof t.completed === 'boolean') 
+            : [];
+
+          const validLinks: LinkItem[] = Array.isArray(importedData.links) 
+            ? importedData.links.filter((l: any): l is LinkItem => 
+                l && typeof l.id === 'string' && typeof l.name === 'string' && typeof l.url === 'string') 
+            : [];
+
+          setSavedNotes(validSavedNotes);
+          setDailyNotes(validDailyNotes);
+          setTasks(validTasks);
+          setLinks(validLinks);
+
           setActiveNoteId(null);
           setNoteTitle(''); 
           setNoteContent('');
