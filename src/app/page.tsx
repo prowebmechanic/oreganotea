@@ -615,7 +615,7 @@ export default function OreganotePage() {
                  gap-0.5 bg-background text-foreground overflow-hidden"
       style={{ fontFamily: 'var(--font-geist-sans), Arial, sans-serif' }}
     >
-      <div className="col-start-1 row-start-1 bg-secondary section-border">
+      <div className="col-start-1 row-start-1 bg-[hsl(var(--section-logo-bg))]">
         <LogoSection 
           onSummarize={handleSummarize} 
           isSummarizing={isSummarizing}
@@ -633,7 +633,7 @@ export default function OreganotePage() {
           onNewProject={() => setShowNewProjectDialog(true)}
         />
       </div>
-      <div className="col-start-1 row-start-2 row-span-2 flex flex-col min-h-0 bg-light-blue-bg section-border">
+      <div className="col-start-1 row-start-2 row-span-2 flex flex-col min-h-0 bg-[hsl(var(--section-calendar-bg))]">
         <CalendarSection 
           dailyNotes={dailyNotes}
           onSaveDailyNote={handleSaveDailyNote}
@@ -641,7 +641,7 @@ export default function OreganotePage() {
         />
       </div>
       
-      <div className="col-start-2 row-start-1 row-span-3 flex flex-col min-h-0 bg-secondary section-border">
+      <div className="col-start-2 row-start-1 row-span-3 flex flex-col min-h-0 bg-[hsl(var(--section-editor-bg))]">
         <MainWindow
           noteTitle={noteTitle}
           setNoteTitle={setNoteTitle}
@@ -655,7 +655,7 @@ export default function OreganotePage() {
         />
       </div>
       
-      <div className="col-start-3 row-start-1 row-span-3 flex flex-col min-h-0 bg-light-blue-bg section-border">
+      <div className="col-start-3 row-start-1 row-span-3 flex flex-col min-h-0 bg-[hsl(var(--section-project-files-bg))]">
          <ProjectFilesSection 
             savedNotes={savedNotes} 
             onLoadNote={handleLoadNote}
@@ -665,7 +665,7 @@ export default function OreganotePage() {
             onUploadFile={handleUploadFile}
           />
       </div>
-      <div className="col-start-3 row-start-4 flex flex-col min-h-0 bg-light-blue-bg section-border">
+      <div className="col-start-3 row-start-4 flex flex-col min-h-0 bg-[hsl(var(--section-todo-bg))]">
         <NotesSection 
           tasks={tasks}
           onAddTask={handleAddTask}
@@ -674,7 +674,7 @@ export default function OreganotePage() {
         /> 
       </div>
       
-      <div className="col-start-1 col-span-2 row-start-4 bg-secondary section-border"> 
+      <div className="col-start-1 col-span-2 row-start-4 bg-[hsl(var(--section-links-bg))]"> 
         <LinksSection 
           links={links}
           onSaveLink={handleSaveLink}
