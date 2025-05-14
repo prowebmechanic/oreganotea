@@ -147,7 +147,7 @@ const CalendarSection: React.FC<CalendarSectionProps> = ({ dailyNotes, onSaveDai
             modifiers={modifiers}
             modifiersClassNames={modifiersClassNames}
           />
-          <ScrollArea className="mt-2 p-2 border border-border rounded-md flex-grow min-h-[80px] bg-card">
+          <ScrollArea className="mt-2 p-2 border border-border rounded-md flex-grow min-h-[96px] bg-card">
             <div className="space-y-2">
               <h4 className="text-xs font-semibold text-primary">
                 {selectedDate ? `Note for: ${selectedDate.toLocaleDateString()}` : 'Click a date to add a note'}
@@ -161,7 +161,7 @@ const CalendarSection: React.FC<CalendarSectionProps> = ({ dailyNotes, onSaveDai
                     placeholder="Add a note for this day..."
                     value={selectedDayNoteText}
                     onChange={(e) => setSelectedDayNoteText(e.target.value)}
-                    className="bg-input text-foreground text-xs h-9" // Adjusted height from h-10 to h-9
+                    className="bg-input text-foreground text-xs h-8" // Adjusted height from h-9 to h-8
                     aria-label="Daily note text area"
                   />
                   <div className="flex gap-2 mt-1">
@@ -186,5 +186,3 @@ const CalendarSection: React.FC<CalendarSectionProps> = ({ dailyNotes, onSaveDai
 };
 
 export default CalendarSection;
-
-    

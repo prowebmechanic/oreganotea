@@ -15,7 +15,7 @@ import { summarizeNote, type SummarizeNoteInput } from '@/ai/flows/summarize-not
 import { saveToDrive, type SaveToDriveInput } from '@/ai/flows/save-to-drive';
 import { rewriteNote, type RewriteNoteInput } from '@/ai/flows/rewrite-note'; 
 import { useToast } from "@/hooks/use-toast";
-// import html2pdf from 'html2pdf.js'; // Removed static import
+// import html2pdf from 'html2pdf.js'; // Removed static import, will use dynamic import
 import type { SavedNote, Task, LinkItem } from '@/types/note';
 import { 
   getSavedNotes, saveNotes as saveNotesToStorage,
@@ -702,5 +702,3 @@ export default function OreganotePage() {
     </div>
   );
 }
-
-    
