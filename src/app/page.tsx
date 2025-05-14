@@ -393,47 +393,69 @@ export default function OreganotePage() {
   }, [savedNotes, dailyNotes, tasks, links, toast]);
   
   const handleImportProjectData = useCallback(() => {
+    console.log('handleImportProjectData called');
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
     input.onchange = async (e) => {
+      console.log('File input changed');
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
+        console.log('File selected:', file.name);
         try {
           const fileContent = await file.text();
+          console.log('File content read (first 100 chars):', fileContent.substring(0, 100) + '...');
           const importedData = JSON.parse(fileContent);
+          console.log('Parsed imported data:', importedData);
 
-          if (importedData.appName !== "Oreganotéa" || 
-              importedData.savedNotes === undefined || 
-              importedData.dailyCalendarNotes === undefined || 
-              importedData.tasks === undefined || 
+          if (importedData.appName !== "Oreganotéa" ||
+              importedData.savedNotes === undefined ||
+              importedData.dailyCalendarNotes === undefined ||
+              importedData.tasks === undefined ||
               importedData.links === undefined) {
+            console.error('Validation failed: Invalid project data file format or missing key sections.');
             throw new Error("Invalid project data file format or missing key sections.");
           }
-          
+          console.log('Initial validation passed.');
+
           if (!confirm("Importing this file will overwrite current project data. Are you sure?")) {
+            console.log('Import cancelled by user.');
+            toast({ title: "Import Cancelled", description: "Project data import was cancelled by the user.", duration: 5000 });
             return;
           }
+          console.log('User confirmed import.');
 
-          const validSavedNotes: SavedNote[] = Array.isArray(importedData.savedNotes) 
-            ? importedData.savedNotes.filter((n: any): n is SavedNote => 
-                n && typeof n.id === 'string' && typeof n.name === 'string' && 
-                typeof n.content === 'string' && typeof n.lastModified === 'number') 
+          const validSavedNotes: SavedNote[] = Array.isArray(importedData.savedNotes)
+            ? importedData.savedNotes.filter((n: any): n is SavedNote =>
+                n && typeof n.id === 'string' && typeof n.name === 'string' &&
+                typeof n.content === 'string' && typeof n.lastModified === 'number')
             : [];
-          
-          const validDailyNotes: Record<string, string> = typeof importedData.dailyCalendarNotes === 'object' && importedData.dailyCalendarNotes !== null 
-            ? importedData.dailyCalendarNotes 
-            : {};
-          
-          const validTasks: Task[] = Array.isArray(importedData.tasks) 
-            ? importedData.tasks.filter((t: any): t is Task => 
-                t && typeof t.id === 'string' && typeof t.text === 'string' && typeof t.completed === 'boolean') 
-            : [];
+          console.log('Validated saved notes:', validSavedNotes);
 
-          const validLinks: LinkItem[] = Array.isArray(importedData.links) 
-            ? importedData.links.filter((l: any): l is LinkItem => 
-                l && typeof l.id === 'string' && typeof l.name === 'string' && typeof l.url === 'string') 
+          const validDailyNotes: Record<string, string> = {};
+          if (typeof importedData.dailyCalendarNotes === 'object' && importedData.dailyCalendarNotes !== null) {
+            for (const key in importedData.dailyCalendarNotes) {
+              if (Object.prototype.hasOwnProperty.call(importedData.dailyCalendarNotes, key) && 
+                  typeof importedData.dailyCalendarNotes[key] === 'string') {
+                validDailyNotes[key] = importedData.dailyCalendarNotes[key];
+              } else {
+                console.warn(`Skipping invalid daily note entry for key: ${key} - value: ${importedData.dailyCalendarNotes[key]}`);
+              }
+            }
+          }
+          console.log('Validated daily notes:', validDailyNotes);
+
+          const validTasks: Task[] = Array.isArray(importedData.tasks)
+            ? importedData.tasks.filter((t: any): t is Task =>
+                t && typeof t.id === 'string' && typeof t.text === 'string' && typeof t.completed === 'boolean')
             : [];
+          console.log('Validated tasks:', validTasks);
+
+          const validLinks: LinkItem[] = Array.isArray(importedData.links)
+            ? importedData.links.filter((l: any): l is LinkItem =>
+                l && typeof l.id === 'string' && typeof l.name === 'string' && typeof l.url === 'string')
+            : [];
+          console.log('Validated links:', validLinks);
 
           setSavedNotes(validSavedNotes);
           setDailyNotes(validDailyNotes);
@@ -441,20 +463,35 @@ export default function OreganotePage() {
           setLinks(validLinks);
 
           setActiveNoteId(null);
-          setNoteTitle(''); 
+          setNoteTitle('');
           setNoteContent('');
           setSummary('');
           setKeyTopics('');
+          console.log('State updated for import.');
 
-          toast({ title: "Project Data Imported", description: "Project data has been successfully imported." });
+          toast({ title: "Project Data Imported", description: "Project data has been successfully imported.", duration: 5000 });
         } catch (error: any) {
-          console.error("Error importing project data:", error);
-          toast({ title: "Import Failed", description: `Error: ${error.message || "Could not parse or load the project file."}`, variant: "destructive" });
+          console.error("Error importing project data:", error.message, error.stack);
+          toast({ title: "Import Failed", description: `Error: ${error.message || "Could not parse or load the project file."}`, variant: "destructive", duration: 7000 });
         }
+      } else {
+        console.log('No file selected or user cancelled file dialog.');
+        toast({ title: "Import Cancelled", description: "No file selected.", variant: "destructive", duration: 5000 });
       }
     };
     input.click();
-  }, [toast]);
+  }, [
+    toast,
+    setSavedNotes,
+    setDailyNotes,
+    setTasks,
+    setLinks,
+    setActiveNoteId,
+    setNoteTitle,
+    setNoteContent,
+    setSummary,
+    setKeyTopics,
+  ]);
 
   const handleSaveProjectAsText = useCallback(() => {
     if (savedNotes.length === 0 && Object.keys(dailyNotes).length === 0 && tasks.length === 0 && links.length === 0) {
@@ -727,3 +764,4 @@ export default function OreganotePage() {
     </div>
   );
 }
+

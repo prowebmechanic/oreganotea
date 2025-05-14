@@ -149,7 +149,7 @@ const CalendarSection: React.FC<CalendarSectionProps> = ({ dailyNotes, onSaveDai
           />
           <ScrollArea className="mt-2 p-2 border border-border rounded-md flex-grow min-h-[96px] bg-card">
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-1">
                 <h4 className="text-xs font-semibold text-primary flex-grow">
                   {selectedDate ? `Note for: ${selectedDate.toLocaleDateString()}` : 'Click a date to add a note'}
                   {selectedDate && isToday(selectedDate) && dailyNotes[formatISO(selectedDate, { representation: 'date' })] && (
@@ -157,7 +157,7 @@ const CalendarSection: React.FC<CalendarSectionProps> = ({ dailyNotes, onSaveDai
                   )}
                 </h4>
                 {selectedDate && (
-                  <Button onClick={handleInternalSaveDailyNote} size="sm" className="text-xs h-7 px-2 bg-primary hover:bg-primary/90 text-primary-foreground ml-2">Save Note</Button>
+                  <Button onClick={handleInternalSaveDailyNote} size="sm" className="text-xs h-6 px-2 bg-primary hover:bg-primary/90 text-primary-foreground ml-2">Save</Button>
                 )}
               </div>
 
@@ -167,12 +167,12 @@ const CalendarSection: React.FC<CalendarSectionProps> = ({ dailyNotes, onSaveDai
                     placeholder="Add a note for this day..."
                     value={selectedDayNoteText}
                     onChange={(e) => setSelectedDayNoteText(e.target.value)}
-                    className="bg-input text-foreground text-xs h-8 mt-1" // Adjusted height from h-9 to h-8 and added mt-1
+                    className="bg-input text-foreground text-xs h-8" 
                     aria-label="Daily note text area"
                   />
                   {dailyNotes[formatISO(selectedDate, { representation: 'date' })] && (
                      <div className="flex justify-end mt-1">
-                        <Button onClick={handleInternalDeleteDailyNote} variant="destructive" size="sm" className="text-xs h-7 px-2">Delete Note</Button>
+                        <Button onClick={handleInternalDeleteDailyNote} variant="destructive" size="sm" className="text-xs h-6 px-2">Delete Note</Button>
                     </div>
                   )}
                 </>
@@ -191,3 +191,4 @@ const CalendarSection: React.FC<CalendarSectionProps> = ({ dailyNotes, onSaveDai
 };
 
 export default CalendarSection;
+
