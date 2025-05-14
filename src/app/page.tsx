@@ -14,6 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { summarizeNote, type SummarizeNoteInput } from '@/ai/flows/summarize-note';
 import { saveToDrive, type SaveToDriveInput } from '@/ai/flows/save-to-drive';
 import { useToast } from "@/hooks/use-toast";
+import html2pdf from 'html2pdf.js';
 import type { SavedNote, Task, LinkItem } from '@/types/note';
 import { 
   getSavedNotes, saveNotes as saveNotesToStorage,
@@ -176,23 +177,85 @@ export default function OreganotePage() {
   }, [toast, activeNoteId]);
   
   const handleMakeHtml = useCallback(() => {
-    if (!noteTitle.trim() && !noteContent.trim()) {
-      toast({ title: "Cannot Create HTML", description: "Note title and content are empty. Add some content first.", variant: "destructive" });
+    if (savedNotes.length === 0 && Object.keys(dailyNotes).length === 0 && tasks.length === 0 && links.length === 0) {
+      toast({ title: "No Data to Export", description: "There is no data to export to HTML.", variant: "destructive" });
       return;
     }
-    const htmlTitle = noteTitle.trim() || "Untitled Note";
-    const htmlBodyContent = noteContent.split('\n').map(p => `<p>${p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`).join('\n');
-    const htmlFullContent = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${htmlTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</title><style>body { font-family: var(--font-geist-sans, Arial, sans-serif); margin: 20px; line-height: 1.6; background-color: hsl(var(--background)); color: hsl(var(--foreground));} h1 { color: hsl(var(--primary)); font-size: 1.8em; margin-bottom: 1em;} p { margin-bottom: 0.8em; font-size: 1em;}</style></head><body><h1>${htmlTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h1>${htmlBodyContent}</body></html>`;
+  
+    let allContent = '';
+  
+    // Add saved notes
+    if (savedNotes.length > 0) {
+      allContent += '<h1>Project Notes</h1>';
+      savedNotes.forEach(note => {
+        allContent += `<article><h2>${note.name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h2>`;
+        allContent += note.content.split('\n').map(p => `<p>${p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`).join('\n');
+        allContent += '</article><hr>';
+      });
+    }
+  
+    // Add daily notes
+    const dailyNoteKeys = Object.keys(dailyNotes).sort();
+    if (dailyNoteKeys.length > 0) {
+      allContent += '<h1>Daily Calendar Notes</h1><section>';
+      dailyNoteKeys.forEach(date => {
+        allContent += `<div><h3>${date}</h3>`;
+        allContent += dailyNotes[date].split('\n').map(p => `<p>${p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`).join('\n');
+        allContent += '</div>';
+      });
+      allContent += '</section><hr>';
+    }
+  
+    // Add tasks
+    if (tasks.length > 0) {
+      allContent += '<h1>ToDo List</h1><ul>';
+      tasks.forEach(task => {
+        allContent += `<li${task.completed ? ' style="text-decoration: line-through; color: #888;"' : ''}>${task.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</li>`;
+      });
+      allContent += '</ul><hr>';
+    }
+  
+    // Add links
+    if (links.length > 0) {
+      allContent += '<h1>Quick Links</h1><ul>';
+      links.forEach(link => {
+        allContent += `<li><a href="${link.url.replace(/"/g, '&quot;')}" target="_blank">${link.name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</a></li>`;
+      });
+      allContent += '</ul>';
+    }
+  
+    const htmlFullContent = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oreganotéa Project Export</title>
+        <style>
+          body { font-family: var(--font-geist-sans, Arial, sans-serif); margin: 20px; line-height: 1.6; background-color: hsl(var(--background, 0 0% 100%)); color: hsl(var(--foreground, 0 0% 3.9%)); }
+          h1 { font-size: 1.8em; margin-top: 1em; margin-bottom: 0.5em; color: hsl(var(--primary, 221 83% 53%)); }
+          h2 { font-size: 1.4em; margin-bottom: 0.3em; color: hsl(var(--primary, 221 83% 53%)); }
+          h3 { font-size: 1.1em; margin-bottom: 0.2em; color: hsl(var(--primary, 221 83% 53%)); }
+          p { margin-bottom: 0.8em; font-size: 1em; }
+          hr { margin: 2em 0; border: 0; border-top: 1px solid hsl(var(--border, 0 0% 87%)); }
+          ul { list-style-type: disc; margin-left: 20px; }
+          article, section > div { margin-bottom: 1em; padding: 0.5em; border: 1px solid hsl(var(--border, 0 0% 87%)); border-radius: var(--radius, 0.5rem); }
+        </style>
+      </head>
+      <body>
+        <header><h1>Oreganotéa Project Export - ${new Date().toLocaleDateString()}</h1></header>
+        <main>${allContent}</main>
+      </body>
+      </html>`;
     const blob = new Blob([htmlFullContent], { type: 'text/html;charset=utf-8' });
     try {
-      const safeFileName = htmlTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'note';
-      saveAs(blob, `${safeFileName}.html`);
-      toast({ title: "HTML File Saved", description: `"${safeFileName}.html" has been downloaded.` });
+      saveAs(blob, 'oreganotea-project-export.html');
+      toast({ title: "HTML Export Complete", description: "Project data exported to 'oreganotea-project-export.html'." });
     } catch (error) {
       console.error("Error saving HTML file:", error);
       toast({ title: "Save HTML Failed", description: "An error occurred while trying to save the HTML file.", variant: "destructive" });
     }
-  }, [noteTitle, noteContent, toast]);
+  }, [savedNotes, dailyNotes, tasks, links, toast]);
   
   const handleSaveToDrive = useCallback(async () => {
     if (!noteTitle.trim() && !noteContent.trim()) {
@@ -201,13 +264,14 @@ export default function OreganotePage() {
     }
     setIsSavingToDrive(true);
     try {
-      const placeholderAccessToken = 'YOUR_GOOGLE_OAUTH_ACCESS_TOKEN'; 
+      // TODO: Implement actual Google OAuth2 flow to get a real access token
+      const placeholderAccessToken = 'YOUR_GOOGLE_OAUTH_ACCESS_TOKEN'; // This needs to be replaced
       if (placeholderAccessToken === 'YOUR_GOOGLE_OAUTH_ACCESS_TOKEN') {
          toast({ title: "Authentication Required", description: "Google Drive integration requires authentication. Please implement OAuth2 flow.", variant: "destructive", duration: 7000 });
         setIsSavingToDrive(false);
         return; 
       }
-      const input: SaveToDriveInput = { noteTitle: noteTitle || 'Untitled Oreganote', noteContent, accessToken: placeholderAccessToken };
+      const input: SaveToDriveInput = { noteTitle: noteTitle || 'Untitled Oreganotéa Note', noteContent, accessToken: placeholderAccessToken };
       const result = await saveToDrive(input);
       toast({ title: "Saved to Google Drive", description: `Note "${result.fileName}" saved. File ID: ${result.fileId}. ${result.webViewLink ? `View: ${result.webViewLink}` : ''}`, duration: 7000, action: result.webViewLink ? (<a href={result.webViewLink} target="_blank" rel="noopener noreferrer" className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-background px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">Open in Drive</a>) : undefined });
     } catch (error: any) {
@@ -266,6 +330,7 @@ export default function OreganotePage() {
     const projectData = {
       version: "1.0.0",
       createdAt: new Date().toISOString(),
+      appName: "Oreganotéa",
       savedNotes,
       dailyCalendarNotes: dailyNotes,
       tasks,
@@ -273,8 +338,8 @@ export default function OreganotePage() {
     };
     const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json;charset=utf-8' });
     try {
-      saveAs(blob, 'oreganote-project-data.json');
-      toast({ title: "Project Data Exported", description: "All project data has been saved to 'oreganote-project-data.json'." });
+      saveAs(blob, 'oreganotea-project-data.json');
+      toast({ title: "Project Data Exported", description: "All project data has been saved to 'oreganotea-project-data.json'." });
     } catch (error) {
       console.error("Error exporting project data:", error);
       toast({ title: "Export Failed", description: "An error occurred while exporting project data.", variant: "destructive" });
@@ -282,8 +347,191 @@ export default function OreganotePage() {
   }, [savedNotes, dailyNotes, tasks, links, toast]);
   
   const handleImportProjectData = useCallback(() => {
-    toast({ title: "Import Project Data", description: "Functionality to import project data coming soon!" });
+    // Basic file input for now
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        try {
+          const fileContent = await file.text();
+          const importedData = JSON.parse(fileContent);
+
+          // Basic validation (can be more extensive)
+          if (importedData.appName !== "Oreganotéa" || !importedData.savedNotes || !importedData.dailyCalendarNotes || !importedData.tasks || !importedData.links) {
+            throw new Error("Invalid project data file format.");
+          }
+          
+          if (!confirm("Importing this file will overwrite current project data. Are you sure?")) {
+            return;
+          }
+
+          setSavedNotes(importedData.savedNotes || []);
+          setDailyNotes(importedData.dailyCalendarNotes || {});
+          setTasks(importedData.tasks || []);
+          setLinks(importedData.links || []);
+          setActiveNoteId(null);
+          setNoteTitle('Untitled Note');
+          setNoteContent('');
+          setSummary('');
+          setKeyTopics('');
+
+          toast({ title: "Project Data Imported", description: "Project data has been successfully imported." });
+        } catch (error: any) {
+          console.error("Error importing project data:", error);
+          toast({ title: "Import Failed", description: `Error: ${error.message || "Could not parse or load the project file."}`, variant: "destructive" });
+        }
+      }
+    };
+    input.click();
   }, [toast]);
+
+  // Save Project as Text File
+  const handleSaveProjectAsText = useCallback(() => {
+    if (savedNotes.length === 0 && Object.keys(dailyNotes).length === 0 && tasks.length === 0 && links.length === 0) {
+      toast({ title: "No Data to Export", description: "There is no data to export as text.", variant: "destructive" });
+      return;
+    }
+
+    let textContent = `Oreganotéa Project Export - ${new Date().toLocaleString()}\n\n`;
+
+    if (savedNotes.length > 0) {
+      textContent += '### PROJECT NOTES ###\n\n';
+      savedNotes.forEach(note => {
+        textContent += `Title: ${note.name}\nContent:\n${note.content}\n---\n\n`;
+      });
+    }
+
+    const dailyNoteKeys = Object.keys(dailyNotes).sort();
+    if (dailyNoteKeys.length > 0) {
+      textContent += '### DAILY CALENDAR NOTES ###\n\n';
+      dailyNoteKeys.forEach(date => {
+        textContent += `Date: ${date}\nNote:\n${dailyNotes[date]}\n---\n\n`;
+      });
+    }
+
+    if (tasks.length > 0) {
+      textContent += '### TODO LIST ###\n\n';
+      tasks.forEach(task => {
+        textContent += `[${task.completed ? 'x' : ' '}] ${task.text}\n`;
+      });
+      textContent += '\n---\n\n';
+    }
+
+    if (links.length > 0) {
+      textContent += '### QUICK LINKS ###\n\n';
+      links.forEach(link => {
+        textContent += `${link.name}: ${link.url}\n`;
+      });
+    }
+
+    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+    try {
+      saveAs(blob, 'oreganotea-project-export.txt');
+      toast({ title: "Text Export Complete", description: "Project data exported to 'oreganotea-project-export.txt'." });
+    } catch (error) {
+      console.error("Error saving text file:", error);
+      toast({ title: "Save Text Failed", description: "An error occurred while trying to save the text file.", variant: "destructive" });
+    }
+  }, [savedNotes, dailyNotes, tasks, links, toast]);
+
+  // Export Project as PDF
+  const handleExportProjectAsPdf = useCallback(() => {
+    if (savedNotes.length === 0 && Object.keys(dailyNotes).length === 0 && tasks.length === 0 && links.length === 0) {
+      toast({ title: "No Data to Export", description: "There is no data to export as PDF.", variant: "destructive" });
+      return;
+    }
+  
+    let allContent = '';
+  
+    // Add saved notes
+    if (savedNotes.length > 0) {
+      allContent += '<h1>Project Notes</h1>';
+      savedNotes.forEach(note => {
+        allContent += `<article><h2>${note.name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h2>`;
+        allContent += note.content.split('\n').map(p => `<p>${p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`).join('\n');
+        allContent += '</article>';
+      });
+    }
+  
+    // Add daily notes
+    const dailyNoteKeys = Object.keys(dailyNotes).sort();
+    if (dailyNoteKeys.length > 0) {
+      allContent += '<h1>Daily Calendar Notes</h1><section class="calendar-notes-section">';
+      dailyNoteKeys.forEach(date => {
+        allContent += `<div class="calendar-note-item"><h3>${date}</h3>`;
+        allContent += dailyNotes[date].split('\n').map(p => `<p>${p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`).join('\n');
+        allContent += '</div>';
+      });
+      allContent += '</section>';
+    }
+  
+    // Add tasks
+    if (tasks.length > 0) {
+      allContent += '<h1>ToDo List</h1><ul class="todo-list">';
+      tasks.forEach(task => {
+        allContent += `<li${task.completed ? ' class="completed"' : ''}>${task.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</li>`;
+      });
+      allContent += '</ul>';
+    }
+  
+    // Add links
+    if (links.length > 0) {
+      allContent += '<h1>Quick Links</h1><ul class="quick-links-list">';
+      links.forEach(link => {
+        allContent += `<li><a href="${link.url.replace(/"/g, '&quot;')}" target="_blank">${link.name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</a></li>`;
+      });
+      allContent += '</ul>';
+    }
+  
+    const pdfContent = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Oreganotéa Project Export</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.5; color: #333; }
+          h1 { font-size: 20px; margin-top: 15px; margin-bottom: 8px; color: #005a9c; border-bottom: 1px solid #eee; padding-bottom: 4px;}
+          h2 { font-size: 16px; margin-bottom: 5px; color: #005a9c; }
+          h3 { font-size: 14px; margin-bottom: 3px; color: #333; }
+          p { margin-bottom: 8px; font-size: 12px; white-space: pre-wrap; }
+          hr { margin: 25px 0; border: 0; border-top: 1px solid #ccc; }
+          ul { list-style-type: disc; margin-left: 20px; padding-left: 0; font-size: 12px; }
+          li { margin-bottom: 4px; }
+          li.completed { text-decoration: line-through; color: #888; }
+          a { color: #ff6600; text-decoration: none; }
+          a:hover { text-decoration: underline; }
+          article, .calendar-notes-section, .todo-list, .quick-links-list { margin-bottom: 20px; }
+          article, .calendar-note-item { padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom:10px; background-color: #f9f9f9;}
+          .calendar-notes-section { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+          header { text-align: center; margin-bottom: 20px; }
+        </style>
+      </head>
+      <body>
+        <header><h1>Oreganotéa Project Export - ${new Date().toLocaleDateString()}</h1></header>
+        <main>${allContent}</main>
+      </body>
+      </html>`;
+  
+    const element = document.createElement('div');
+    element.innerHTML = pdfContent;
+  
+    html2pdf()
+      .from(element)
+      .set({
+        margin: [10, 10, 10, 10], // top, left, bottom, right
+        filename: 'oreganotea-project-export.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      })
+      .save()
+      .then(() => toast({ title: "PDF Export Complete", description: "Project data exported to 'oreganotea-project-export.pdf'." }))
+      .catch(error => toast({ title: "PDF Export Failed", description: `An error occurred: ${error.message}`, variant: "destructive" }));
+  }, [savedNotes, dailyNotes, tasks, links, toast]);
 
   // New Project
   const handleNewProjectConfirm = useCallback(() => {
@@ -330,6 +578,8 @@ export default function OreganotePage() {
           onExportProjectData={handleExportProjectData}
           onImportProjectData={handleImportProjectData}
           onNewProject={() => setShowNewProjectDialog(true)}
+          onExportProjectAsPdf={handleExportProjectAsPdf}
+          onSaveProjectAsText={handleSaveProjectAsText}
         />
       </div>
       <div className="col-start-1 row-start-2 row-span-2 flex flex-col min-h-0 bg-light-blue">
@@ -405,3 +655,5 @@ export default function OreganotePage() {
     </div>
   );
 }
+
+  
