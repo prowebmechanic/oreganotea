@@ -8,13 +8,14 @@ import MainWindow from '@/components/orga-note/MainWindow';
 import NotesSection from '@/components/orga-note/NotesSection';
 import ProjectFilesSection from '@/components/orga-note/ProjectFilesSection';
 import LinksSection from '@/components/orga-note/LinksSection';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 
 import { summarizeNote, type SummarizeNoteInput } from '@/ai/flows/summarize-note';
 import { saveToDrive, type SaveToDriveInput } from '@/ai/flows/save-to-drive';
+import { rewriteNote, type RewriteNoteInput } from '@/ai/flows/rewrite-note'; 
 import { useToast } from "@/hooks/use-toast";
-import html2pdf from 'html2pdf.js';
+// import html2pdf from 'html2pdf.js'; // Removed static import
 import type { SavedNote, Task, LinkItem } from '@/types/note';
 import { 
   getSavedNotes, saveNotes as saveNotesToStorage,
@@ -33,11 +34,11 @@ export default function OreganotePage() {
   const [keyTopics, setKeyTopics] = useState<string>('');
   const [isSummarizing, setIsSummarizing] = useState<boolean>(false);
   const [isSavingToDrive, setIsSavingToDrive] = useState<boolean>(false);
+  const [isRewritingAI, setIsRewritingAI] = useState<boolean>(false);
   
   const [savedNotes, setSavedNotes] = useState<SavedNote[]>([]);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   
-  // Lifted states
   const [dailyNotes, setDailyNotes] = useState<Record<string, string>>({});
   const [tasks, setTasks] = useState<Task[]>([]);
   const [links, setLinks] = useState<LinkItem[]>([]);
@@ -57,15 +58,13 @@ export default function OreganotePage() {
 
       const notesFromStorage = getSavedNotes();
       if (notesFromStorage.length > 0) {
-        // Optionally load the first note or a default state
         // handleLoadNote(notesFromStorage[0].id); 
       } else {
-        setNoteTitle('Untitled Note'); 
+        // setNoteTitle(''); 
       }
     }
   }, []);
 
-  // Effects to save lifted states to localStorage
   useEffect(() => { if (isClient) saveNotesToStorage(savedNotes); }, [savedNotes, isClient]);
   useEffect(() => { if (isClient) saveDailyCalendarNotes(dailyNotes); }, [dailyNotes, isClient]);
   useEffect(() => { if (isClient) saveTasks(tasks); }, [tasks, isClient]);
@@ -93,6 +92,25 @@ export default function OreganotePage() {
       setKeyTopics('Error');
     } finally {
       setIsSummarizing(false);
+    }
+  }, [noteContent, toast]);
+
+  const handleRewriteNoteAI = useCallback(async () => {
+    if (!noteContent.trim()) {
+      toast({ title: "Empty Note", description: "Cannot rewrite an empty note.", variant: "destructive" });
+      return;
+    }
+    setIsRewritingAI(true);
+    try {
+      const input: RewriteNoteInput = { noteContent }; 
+      const result = await rewriteNote(input);
+      setNoteContent(result.rewrittenContent); 
+      toast({ title: "Rewrite Complete", description: "Note has been rewritten." });
+    } catch (error: any) {
+      console.error('Error rewriting note:', error);
+      toast({ title: "Rewrite Failed", description: error.message || "An error occurred while rewriting the note.", variant: "destructive" });
+    } finally {
+      setIsRewritingAI(false);
     }
   }, [noteContent, toast]);
 
@@ -147,7 +165,7 @@ export default function OreganotePage() {
     setSavedNotes(prev => prev.filter(n => n.id !== noteId));
     if (activeNoteId === noteId) {
       setActiveNoteId(null);
-      setNoteTitle('Untitled Note');
+      setNoteTitle(''); 
       setNoteContent('');
       setSummary('');
       setKeyTopics('');
@@ -155,9 +173,9 @@ export default function OreganotePage() {
     toast({ title: "Note Deleted", description: `"${noteToDelete?.name || 'Note'}" has been deleted.` });
   }, [activeNoteId, savedNotes, toast]);
 
-  const handleNewEditorNote = useCallback(() => { // Renamed from handleNewNote
+  const handleNewEditorNote = useCallback(() => { 
     setActiveNoteId(null);
-    setNoteTitle('Untitled Note'); 
+    setNoteTitle(''); 
     setNoteContent('');
     setSummary('');
     setKeyTopics('');
@@ -176,7 +194,7 @@ export default function OreganotePage() {
     toast({ title: "Note Renamed", description: `Note renamed to "${newName.trim()}".` });
   }, [toast, activeNoteId]);
   
-  const handleMakeHtml = useCallback(() => {
+  const handleSaveProjectAsHtml = useCallback(() => {
     if (savedNotes.length === 0 && Object.keys(dailyNotes).length === 0 && tasks.length === 0 && links.length === 0) {
       toast({ title: "No Data to Export", description: "There is no data to export to HTML.", variant: "destructive" });
       return;
@@ -184,7 +202,6 @@ export default function OreganotePage() {
   
     let allContent = '';
   
-    // Add saved notes
     if (savedNotes.length > 0) {
       allContent += '<h1>Project Notes</h1>';
       savedNotes.forEach(note => {
@@ -194,7 +211,6 @@ export default function OreganotePage() {
       });
     }
   
-    // Add daily notes
     const dailyNoteKeys = Object.keys(dailyNotes).sort();
     if (dailyNoteKeys.length > 0) {
       allContent += '<h1>Daily Calendar Notes</h1><section>';
@@ -206,7 +222,6 @@ export default function OreganotePage() {
       allContent += '</section><hr>';
     }
   
-    // Add tasks
     if (tasks.length > 0) {
       allContent += '<h1>ToDo List</h1><ul>';
       tasks.forEach(task => {
@@ -215,7 +230,6 @@ export default function OreganotePage() {
       allContent += '</ul><hr>';
     }
   
-    // Add links
     if (links.length > 0) {
       allContent += '<h1>Quick Links</h1><ul>';
       links.forEach(link => {
@@ -232,14 +246,14 @@ export default function OreganotePage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Oreganotéa Project Export</title>
         <style>
-          body { font-family: var(--font-geist-sans, Arial, sans-serif); margin: 20px; line-height: 1.6; background-color: hsl(var(--background, 0 0% 100%)); color: hsl(var(--foreground, 0 0% 3.9%)); }
+          body { font-family: var(--font-geist-sans, Arial, sans-serif); margin: 20px; line-height: 1.6; background-color: hsl(var(--background, 0 0% 100%)); color: hsl(var(--foreground, 0 0% 0%)); } 
           h1 { font-size: 1.8em; margin-top: 1em; margin-bottom: 0.5em; color: hsl(var(--primary, 221 83% 53%)); }
           h2 { font-size: 1.4em; margin-bottom: 0.3em; color: hsl(var(--primary, 221 83% 53%)); }
           h3 { font-size: 1.1em; margin-bottom: 0.2em; color: hsl(var(--primary, 221 83% 53%)); }
           p { margin-bottom: 0.8em; font-size: 1em; }
-          hr { margin: 2em 0; border: 0; border-top: 1px solid hsl(var(--border, 0 0% 87%)); }
+          hr { margin: 2em 0; border: 0; border-top: 1px solid hsl(var(--border, 0 0% 13%)); } 
           ul { list-style-type: disc; margin-left: 20px; }
-          article, section > div { margin-bottom: 1em; padding: 0.5em; border: 1px solid hsl(var(--border, 0 0% 87%)); border-radius: var(--radius, 0.5rem); }
+          article, section > div { margin-bottom: 1em; padding: 0.5em; border: 1px solid hsl(var(--border, 0 0% 13%)); border-radius: var(--radius, 0.5rem); } 
         </style>
       </head>
       <body>
@@ -256,6 +270,43 @@ export default function OreganotePage() {
       toast({ title: "Save HTML Failed", description: "An error occurred while trying to save the HTML file.", variant: "destructive" });
     }
   }, [savedNotes, dailyNotes, tasks, links, toast]);
+
+  const handleSaveCurrentNoteAsHtml = useCallback(() => {
+    if (!noteTitle.trim() && !noteContent.trim()) {
+      toast({ title: "Cannot Create HTML", description: "Note title and content are empty. Add some content first.", variant: "destructive" });
+      return;
+    }
+    const htmlTitle = noteTitle.trim() || "Untitled Note";
+    const htmlBodyContent = noteContent.split('\n').map(p => `<p>${p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`).join('\n');
+    const htmlFullContent = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${htmlTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</title>
+        <style>
+          body { font-family: var(--font-geist-sans, Arial, sans-serif); margin: 20px; line-height: 1.6; background-color: hsl(var(--background)); color: hsl(var(--foreground)); }
+          h1 { color: hsl(var(--primary)); font-size: 1.8em; margin-bottom: 1em; }
+          p { margin-bottom: 0.8em; font-size: 1em; }
+        </style>
+      </head>
+      <body>
+        <h1>${htmlTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h1>
+        ${htmlBodyContent}
+      </body>
+      </html>
+    `;
+    const blob = new Blob([htmlFullContent], { type: 'text/html;charset=utf-8' });
+    try {
+        const safeFileName = htmlTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'note';
+        saveAs(blob, `${safeFileName}.html`);
+        toast({ title: "Note HTML Saved", description: `"${safeFileName}.html" has been downloaded.` });
+    } catch (error) {
+        console.error("Error saving note HTML file:", error);
+        toast({ title: "Save Note HTML Failed", description: "An error occurred while trying to save the note HTML file.", variant: "destructive"});
+    }
+  }, [noteTitle, noteContent, toast]);
   
   const handleSaveToDrive = useCallback(async () => {
     if (!noteTitle.trim() && !noteContent.trim()) {
@@ -264,8 +315,7 @@ export default function OreganotePage() {
     }
     setIsSavingToDrive(true);
     try {
-      // TODO: Implement actual Google OAuth2 flow to get a real access token
-      const placeholderAccessToken = 'YOUR_GOOGLE_OAUTH_ACCESS_TOKEN'; // This needs to be replaced
+      const placeholderAccessToken = 'YOUR_GOOGLE_OAUTH_ACCESS_TOKEN'; 
       if (placeholderAccessToken === 'YOUR_GOOGLE_OAUTH_ACCESS_TOKEN') {
          toast({ title: "Authentication Required", description: "Google Drive integration requires authentication. Please implement OAuth2 flow.", variant: "destructive", duration: 7000 });
         setIsSavingToDrive(false);
@@ -282,7 +332,6 @@ export default function OreganotePage() {
     }
   }, [noteTitle, noteContent, toast]);
 
-  // Handlers for lifted state (Daily Notes)
   const handleSaveDailyNote = useCallback((date: Date, noteText: string) => {
     const dateISO = formatISO(date, { representation: 'date' });
     setDailyNotes(prev => ({ ...prev, [dateISO]: noteText }));
@@ -297,7 +346,6 @@ export default function OreganotePage() {
     });
   }, []);
 
-  // Handlers for lifted state (Tasks)
   const handleAddTask = useCallback((text: string) => {
     const newTask: Task = { id: Date.now().toString(), text, completed: false };
     setTasks(prev => [newTask, ...prev]);
@@ -311,7 +359,6 @@ export default function OreganotePage() {
     setTasks(prev => prev.filter(task => task.id !== taskId));
   }, []);
 
-  // Handlers for lifted state (Links)
   const handleSaveLink = useCallback((name: string, url: string, id?: string) => {
     if (id) {
       setLinks(prev => prev.map(link => link.id === id ? { ...link, name, url } : link));
@@ -325,7 +372,6 @@ export default function OreganotePage() {
     setLinks(prev => prev.filter(link => link.id !== linkId));
   }, []);
 
-  // Export Project Data
   const handleExportProjectData = useCallback(() => {
     const projectData = {
       version: "1.0.0",
@@ -347,7 +393,6 @@ export default function OreganotePage() {
   }, [savedNotes, dailyNotes, tasks, links, toast]);
   
   const handleImportProjectData = useCallback(() => {
-    // Basic file input for now
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
@@ -358,7 +403,6 @@ export default function OreganotePage() {
           const fileContent = await file.text();
           const importedData = JSON.parse(fileContent);
 
-          // Basic validation (can be more extensive)
           if (importedData.appName !== "Oreganotéa" || !importedData.savedNotes || !importedData.dailyCalendarNotes || !importedData.tasks || !importedData.links) {
             throw new Error("Invalid project data file format.");
           }
@@ -372,7 +416,7 @@ export default function OreganotePage() {
           setTasks(importedData.tasks || []);
           setLinks(importedData.links || []);
           setActiveNoteId(null);
-          setNoteTitle('Untitled Note');
+          setNoteTitle(''); 
           setNoteContent('');
           setSummary('');
           setKeyTopics('');
@@ -387,7 +431,6 @@ export default function OreganotePage() {
     input.click();
   }, [toast]);
 
-  // Save Project as Text File
   const handleSaveProjectAsText = useCallback(() => {
     if (savedNotes.length === 0 && Object.keys(dailyNotes).length === 0 && tasks.length === 0 && links.length === 0) {
       toast({ title: "No Data to Export", description: "There is no data to export as text.", variant: "destructive" });
@@ -436,8 +479,11 @@ export default function OreganotePage() {
     }
   }, [savedNotes, dailyNotes, tasks, links, toast]);
 
-  // Export Project as PDF
-  const handleExportProjectAsPdf = useCallback(() => {
+  const handleExportProjectAsPdf = useCallback(async () => {
+    if (typeof window === 'undefined') {
+        toast({ title: "Environment Error", description: "PDF export can only be done in the browser.", variant: "destructive" });
+        return;
+    }
     if (savedNotes.length === 0 && Object.keys(dailyNotes).length === 0 && tasks.length === 0 && links.length === 0) {
       toast({ title: "No Data to Export", description: "There is no data to export as PDF.", variant: "destructive" });
       return;
@@ -445,7 +491,6 @@ export default function OreganotePage() {
   
     let allContent = '';
   
-    // Add saved notes
     if (savedNotes.length > 0) {
       allContent += '<h1>Project Notes</h1>';
       savedNotes.forEach(note => {
@@ -455,7 +500,6 @@ export default function OreganotePage() {
       });
     }
   
-    // Add daily notes
     const dailyNoteKeys = Object.keys(dailyNotes).sort();
     if (dailyNoteKeys.length > 0) {
       allContent += '<h1>Daily Calendar Notes</h1><section class="calendar-notes-section">';
@@ -467,7 +511,6 @@ export default function OreganotePage() {
       allContent += '</section>';
     }
   
-    // Add tasks
     if (tasks.length > 0) {
       allContent += '<h1>ToDo List</h1><ul class="todo-list">';
       tasks.forEach(task => {
@@ -476,7 +519,6 @@ export default function OreganotePage() {
       allContent += '</ul>';
     }
   
-    // Add links
     if (links.length > 0) {
       allContent += '<h1>Quick Links</h1><ul class="quick-links-list">';
       links.forEach(link => {
@@ -493,21 +535,26 @@ export default function OreganotePage() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Oreganotéa Project Export</title>
         <style>
-          body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.5; color: #333; }
-          h1 { font-size: 20px; margin-top: 15px; margin-bottom: 8px; color: #005a9c; border-bottom: 1px solid #eee; padding-bottom: 4px;}
-          h2 { font-size: 16px; margin-bottom: 5px; color: #005a9c; }
+          body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.5; color: #000; background-color: #fff; } 
+          h1 { font-size: 20px; margin-top: 15px; margin-bottom: 8px; color: hsl(var(--primary-pdf, 221 83% 53%)); border-bottom: 1px solid #eee; padding-bottom: 4px;} 
+          h2 { font-size: 16px; margin-bottom: 5px; color: hsl(var(--primary-pdf, 221 83% 53%)); } 
           h3 { font-size: 14px; margin-bottom: 3px; color: #333; }
           p { margin-bottom: 8px; font-size: 12px; white-space: pre-wrap; }
           hr { margin: 25px 0; border: 0; border-top: 1px solid #ccc; }
           ul { list-style-type: disc; margin-left: 20px; padding-left: 0; font-size: 12px; }
           li { margin-bottom: 4px; }
           li.completed { text-decoration: line-through; color: #888; }
-          a { color: #ff6600; text-decoration: none; }
+          a { color: hsl(var(--accent-pdf, 30 100% 50%)); text-decoration: none; } 
           a:hover { text-decoration: underline; }
           article, .calendar-notes-section, .todo-list, .quick-links-list { margin-bottom: 20px; }
           article, .calendar-note-item { padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom:10px; background-color: #f9f9f9;}
           .calendar-notes-section { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
           header { text-align: center; margin-bottom: 20px; }
+          /* Define HSL variables for PDF if they are different from the main theme or for fallback */
+          :root {
+            --primary-pdf: 221 83% 53%; /* Default Dark Blue */
+            --accent-pdf: 30 100% 50%; /* Default Orange */
+          }
         </style>
       </head>
       <body>
@@ -518,25 +565,28 @@ export default function OreganotePage() {
   
     const element = document.createElement('div');
     element.innerHTML = pdfContent;
-  
-    html2pdf()
-      .from(element)
-      .set({
-        margin: [10, 10, 10, 10], // top, left, bottom, right
-        filename: 'oreganotea-project-export.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      })
-      .save()
-      .then(() => toast({ title: "PDF Export Complete", description: "Project data exported to 'oreganotea-project-export.pdf'." }))
-      .catch(error => toast({ title: "PDF Export Failed", description: `An error occurred: ${error.message}`, variant: "destructive" }));
+
+    try {
+      const html2pdf = (await import('html2pdf.js')).default;
+      html2pdf()
+        .from(element)
+        .set({
+          margin: [10, 10, 10, 10], 
+          filename: 'oreganotea-project-export.pdf',
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        })
+        .save()
+        .then(() => toast({ title: "PDF Export Complete", description: "Project data exported to 'oreganotea-project-export.pdf'." }))
+        .catch((error: any) => toast({ title: "PDF Export Failed", description: `An error occurred: ${error.message}`, variant: "destructive" }));
+    } catch (error: any) {
+        toast({ title: "PDF Export Failed", description: `Could not load PDF generation library: ${error.message}`, variant: "destructive" });
+    }
   }, [savedNotes, dailyNotes, tasks, links, toast]);
 
-  // New Project
   const handleNewProjectConfirm = useCallback(() => {
-    // Reset all states
-    setNoteTitle('Untitled Note');
+    setNoteTitle(''); 
     setNoteContent('');
     setSummary('');
     setKeyTopics('');
@@ -546,7 +596,6 @@ export default function OreganotePage() {
     setTasks([]);
     setLinks([]);
 
-    // Clear localStorage
     clearAllOreganoteData();
     
     setShowNewProjectDialog(false);
@@ -566,23 +615,25 @@ export default function OreganotePage() {
                  gap-0.5 bg-background text-foreground overflow-hidden"
       style={{ fontFamily: 'var(--font-geist-sans), Arial, sans-serif' }}
     >
-      {/* Column 1: Logo, Calendar */}
-      <div className="col-start-1 row-start-1 bg-secondary">
+      <div className="col-start-1 row-start-1 bg-secondary section-border">
         <LogoSection 
           onSummarize={handleSummarize} 
           isSummarizing={isSummarizing}
-          onMakeHtml={handleMakeHtml}
+          onSaveProjectAsHtml={handleSaveProjectAsHtml}
+          onSaveNoteAsHtml={handleSaveCurrentNoteAsHtml}
+          onSaveProjectAsText={handleSaveProjectAsText}
+          onExportProjectAsPdf={handleExportProjectAsPdf}
           onSaveToDrive={isSavingToDrive ? () => {} : handleSaveToDrive}
           isSavingToDrive={isSavingToDrive}
           onSendShare={handleSendShare}
+          onRewriteNoteAI={handleRewriteNoteAI}
+          isRewritingAI={isRewritingAI}
           onExportProjectData={handleExportProjectData}
           onImportProjectData={handleImportProjectData}
           onNewProject={() => setShowNewProjectDialog(true)}
-          onExportProjectAsPdf={handleExportProjectAsPdf}
-          onSaveProjectAsText={handleSaveProjectAsText}
         />
       </div>
-      <div className="col-start-1 row-start-2 row-span-2 flex flex-col min-h-0 bg-light-blue">
+      <div className="col-start-1 row-start-2 row-span-2 flex flex-col min-h-0 bg-light-blue-bg section-border">
         <CalendarSection 
           dailyNotes={dailyNotes}
           onSaveDailyNote={handleSaveDailyNote}
@@ -590,8 +641,7 @@ export default function OreganotePage() {
         />
       </div>
       
-      {/* Column 2: Main Note Editor Window */}
-      <div className="col-start-2 row-start-1 row-span-3 flex flex-col min-h-0 bg-secondary">
+      <div className="col-start-2 row-start-1 row-span-3 flex flex-col min-h-0 bg-secondary section-border">
         <MainWindow
           noteTitle={noteTitle}
           setNoteTitle={setNoteTitle}
@@ -601,12 +651,11 @@ export default function OreganotePage() {
           keyTopics={keyTopics}
           isSummarizing={isSummarizing}
           onSaveCurrentNote={handleSaveCurrentNote}
-          onNewNote={handleNewEditorNote} 
+          onNewNote={handleNewEditorNote}
         />
       </div>
       
-      {/* Column 3: Project Files (top), ToDo (bottom) */}
-      <div className="col-start-3 row-start-1 row-span-3 flex flex-col min-h-0 bg-light-blue">
+      <div className="col-start-3 row-start-1 row-span-3 flex flex-col min-h-0 bg-light-blue-bg section-border">
          <ProjectFilesSection 
             savedNotes={savedNotes} 
             onLoadNote={handleLoadNote}
@@ -616,7 +665,7 @@ export default function OreganotePage() {
             onUploadFile={handleUploadFile}
           />
       </div>
-      <div className="col-start-3 row-start-4 flex flex-col min-h-0 bg-light-blue">
+      <div className="col-start-3 row-start-4 flex flex-col min-h-0 bg-light-blue-bg section-border">
         <NotesSection 
           tasks={tasks}
           onAddTask={handleAddTask}
@@ -625,8 +674,7 @@ export default function OreganotePage() {
         /> 
       </div>
       
-      {/* Bottom Row: Links Section - Spanning C1 and C2 */}
-      <div className="col-start-1 col-span-2 row-start-4 bg-secondary"> 
+      <div className="col-start-1 col-span-2 row-start-4 bg-secondary section-border"> 
         <LinksSection 
           links={links}
           onSaveLink={handleSaveLink}
@@ -634,12 +682,11 @@ export default function OreganotePage() {
         />
       </div>
 
-      {/* New Project Confirmation Dialog */}
       <AlertDialog open={showNewProjectDialog} onOpenChange={setShowNewProjectDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-card border-border text-card-foreground">
           <AlertDialogHeader>
             <AlertDialogTitle>Create New Project?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="text-muted-foreground">
               This action will erase all current project data (notes, calendar entries, tasks, links) and start a new blank project. 
               This cannot be undone. Make sure you have saved or exported your current project data if you wish to keep it.
             </AlertDialogDescription>
@@ -656,4 +703,4 @@ export default function OreganotePage() {
   );
 }
 
-  
+    

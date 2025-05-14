@@ -9,16 +9,16 @@ body {
 @layer base {
   :root {
     --background: 0 0% 100%; /* white */
-    --foreground: 0 0% 3.9%; /* almost black for text */
+    --foreground: 0 0% 0%; /* black for text and explicit borders */
 
     --card: 0 0% 100%; /* white */
-    --card-foreground: 0 0% 3.9%; /* almost black */
+    --card-foreground: 0 0% 0%; /* black */
 
     --popover: 0 0% 100%; /* white */
-    --popover-foreground: 0 0% 3.9%; /* almost black */
+    --popover-foreground: 0 0% 0%; /* black */
 
     --primary: 221 83% 53%; /* dark blue */
-    --primary-foreground: 0 0% 100%; /* white */
+    --primary-foreground: 0 0% 100%; /* white for text on primary */
 
     --secondary: 0 0% 96.1%; /* light grey - Used for "grey" box backgrounds */
     --secondary-foreground: 0 0% 9%; /* dark grey for text on secondary */
@@ -26,15 +26,15 @@ body {
     --muted: 0 0% 96.1%; /* light grey */
     --muted-foreground: 0 0% 45.1%; /* medium grey for text on muted */
 
-    --accent: 30 100% 50%; /* orange */
-    --accent-foreground: 0 0% 100%; /* white - for text on orange */
+    --accent: 127 35% 74%; /* soft green #A7D1AB */
+    --accent-foreground: 0 0% 0%; /* black text for soft green */
     
     --destructive: 0 84.2% 60.2%; /* red */
     --destructive-foreground: 0 0% 98%; /* white/light text on red */
 
-    --border: 0 0% 87%; /* Lighter grey for general borders */
+    --border: 0 0% 13%; /* Darker grey, almost black for general borders (was 87%) */
     --input: 0 0% 98%; /* very light grey for input background, border will be --border */
-    --ring: 30 100% 50%; /* orange for focus rings */
+    --ring: 127 35% 74%; /* soft green for focus rings */
 
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
@@ -43,19 +43,19 @@ body {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
 
-    /* Custom light blue for box backgrounds */
-    --light-blue-bg: 200 100% 92%; /* A very light, pastel blue */
-    --light-blue-bg-foreground: 0 0% 3.9%; /* Text color for light blue bg */
+    /* Custom light blue (now very light grey for some sections) */
+    --light-blue-bg: 0 0% 98%; /* A very light, almost white grey */
+    --light-blue-bg-foreground: 0 0% 0%; /* Text color for light blue bg - black */
 
-    /* Sidebar variables */
+    /* Sidebar variables - generally use main theme colors */
     --sidebar-background: 0 0% 100%; /* white */
-    --sidebar-foreground: 0 0% 3.9%;   /* almost black text */
+    --sidebar-foreground: 0 0% 0%;   /* black text */
     --sidebar-primary: 221 83% 53%; /* dark blue */
     --sidebar-primary-foreground: 0 0% 100%; /* white */
-    --sidebar-accent: 30 100% 50%; /* orange */
-    --sidebar-accent-foreground: 0 0% 100%; /* white */
-    --sidebar-border: 0 0% 87%; /* lighter grey for sidebar internal borders */
-    --sidebar-ring: 30 100% 50%; /* orange */
+    --sidebar-accent: 127 35% 74%; /* soft green */
+    --sidebar-accent-foreground: 0 0% 0%; /* black text for soft green */
+    --sidebar-border: 0 0% 13%; /* darker grey/black for sidebar internal borders */
+    --sidebar-ring: 127 35% 74%; /* soft green */
   }
 
   .dark {
@@ -71,21 +71,21 @@ body {
     --primary: 221 73% 63%; 
     --primary-foreground: 0 0% 100%; 
 
-    --secondary: 240 4% 12%; /* Darker grey for "grey" box backgrounds in dark mode */
+    --secondary: 240 4% 12%; 
     --secondary-foreground: 0 0% 98%;
 
     --muted: 240 4% 12%;
     --muted-foreground: 0 0% 63.9%;
 
-    --accent: 30 90% 55%; 
-    --accent-foreground: 0 0% 100%; 
+    --accent: 127 30% 50%; /* darker soft green for dark mode */
+    --accent-foreground: 0 0% 98%; /* light text for dark green */
 
     --destructive: 0 70% 50%; 
     --destructive-foreground: 0 0% 98%;
 
     --border: 0 0% 25%; 
     --input: 240 4% 10%; 
-    --ring: 30 90% 55%; 
+    --ring: 127 30% 50%; /* darker soft green for focus rings */
 
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
@@ -93,18 +93,17 @@ body {
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
 
-    /* Custom light blue for dark mode */
-    --light-blue-bg: 200 30% 18%; /* A darker, muted blue for dark mode */
+    --light-blue-bg: 240 4% 8%; /* Darker grey for these sections in dark mode */
     --light-blue-bg-foreground: 0 0% 98%;
 
     --sidebar-background: 240 6% 10%; 
     --sidebar-foreground: 0 0% 95%;   
     --sidebar-primary: 221 73% 63%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 30 90% 55%;
-    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-accent: 127 30% 50%; /* darker soft green */
+    --sidebar-accent-foreground: 0 0% 98%; /* light text for dark green */
     --sidebar-border: 0 0% 20%; 
-    --sidebar-ring: 30 90% 55%;
+    --sidebar-ring: 127 30% 50%;
   }
 }
 
@@ -118,4 +117,10 @@ body {
   button {
     @apply ring-ring; 
   }
+  /* Explicit black border for sections if needed */
+  .section-border {
+    @apply border border-foreground; /* Uses black as foreground is black */
+  }
 }
+
+    

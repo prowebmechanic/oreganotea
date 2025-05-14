@@ -18,7 +18,7 @@ interface CalendarSectionProps {
 const CalendarSection: React.FC<CalendarSectionProps> = ({ dailyNotes, onSaveDailyNote, onDeleteDailyNote }) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date()); 
   const [clientMounted, setClientMounted] = useState(false);
-  const [currentMonthView, setCurrentMonthView] = useState<Date>(new Date()); // Simplified to current month
+  const [currentMonthView, setCurrentMonthView] = useState<Date>(new Date()); 
   const [selectedDayNoteText, setSelectedDayNoteText] = useState('');
 
   const { toast } = useToast();
@@ -69,7 +69,7 @@ const CalendarSection: React.FC<CalendarSectionProps> = ({ dailyNotes, onSaveDai
       return;
     }
     onDeleteDailyNote(selectedDate);
-    setSelectedDayNoteText(''); // Clear text area after deletion
+    setSelectedDayNoteText(''); 
     toast({ title: "Note Deleted", description: `Note for ${selectedDate.toLocaleDateString()} deleted.` });
   }, [selectedDate, dailyNotes, onDeleteDailyNote, toast]);
 
@@ -161,10 +161,10 @@ const CalendarSection: React.FC<CalendarSectionProps> = ({ dailyNotes, onSaveDai
                     placeholder="Add a note for this day..."
                     value={selectedDayNoteText}
                     onChange={(e) => setSelectedDayNoteText(e.target.value)}
-                    className="bg-input text-foreground text-xs h-12"
+                    className="bg-input text-foreground text-xs h-9" // Adjusted height from h-10 to h-9
                     aria-label="Daily note text area"
                   />
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mt-1">
                     <Button onClick={handleInternalSaveDailyNote} size="sm" className="text-xs h-7 px-2 bg-primary hover:bg-primary/90 text-primary-foreground">Save Note</Button>
                     {dailyNotes[formatISO(selectedDate, { representation: 'date' })] && (
                       <Button onClick={handleInternalDeleteDailyNote} variant="destructive" size="sm" className="text-xs h-7 px-2">Delete Note</Button>
@@ -186,3 +186,5 @@ const CalendarSection: React.FC<CalendarSectionProps> = ({ dailyNotes, onSaveDai
 };
 
 export default CalendarSection;
+
+    
